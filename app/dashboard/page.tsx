@@ -56,7 +56,7 @@ export default function Dashboard() {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="nome" />
           <YAxis />
-          <Tooltip formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
+          <Tooltip formatter={(v: unknown) => `R$ ${Number(v).toFixed(2)}`} />
           <Legend />
           <Bar dataKey="valor" fill="#2563eb" name="Valor (R$)" />
         </BarChart>
