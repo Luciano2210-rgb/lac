@@ -894,22 +894,35 @@ function handleImp(e,tipo){
       var dataCell=row[1]?row[1].toString().trim():'';
 
       if(!fornec||!valorCell)return;
-      // Parse value - raw:true means XLSX returns actual numbers
+      // Parse value - raw:true gives pure numbers from XLSX
       var valor=0;
       var rawVal=row[8];
       if(typeof rawVal==='number'){
+        // Pure number from raw:true - use directly
         valor=rawVal;
       } else if(rawVal){
-        var valorStr=rawVal.toString().trim().replace(/[R$\s]/g,'');
-        // Handle Brazilian format strings: 70.000,00
+        var valorStr=rawVal.toString().trim();
+        // Remove R$, spaces, non-numeric except . and ,
+        valorStr=valorStr.replace(/[^0-9.,]/g,'').trim();
+        if(!valorStr)return;
+        // American format: 70,000.00 (comma=thousands, dot=decimal)
         if(valorStr.indexOf(',')>-1 && valorStr.indexOf('.')>-1){
-          valorStr=valorStr.replace(/\./g,'').replace(',','.');
+          var commaPos=valorStr.lastIndexOf(',');
+          var dotPos=valorStr.lastIndexOf('.');
+          if(dotPos>commaPos){
+            // dot is decimal: 70,000.00 -> remove commas
+            valorStr=valorStr.replace(/,/g,'');
+          } else {
+            // comma is decimal: 70.000,00 -> remove dots, comma to dot
+            valorStr=valorStr.replace(/\./g,'').replace(',','.');
+          }
         } else if(valorStr.indexOf(',')>-1){
-          var pts=valorStr.split(',');
-          valorStr=pts[1]&&pts[1].length<=2?valorStr.replace(',','.'):valorStr.replace(/,/g,'');
-        } else if(valorStr.indexOf('.')>-1){
-          var dps=valorStr.split('.');
-          if(dps[dps.length-1].length===3)valorStr=valorStr.replace(/\./g,'');
+          var cparts=valorStr.split(',');
+          if(cparts[1]&&cparts[1].length<=2){
+            valorStr=valorStr.replace(',','.');
+          } else {
+            valorStr=valorStr.replace(/,/g,'');
+          }
         }
         valor=parseFloat(valorStr)||0;
       }
