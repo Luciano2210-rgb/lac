@@ -875,9 +875,9 @@ function handleImp(e,tipo){
   var reader=new FileReader();
   reader.onload=function(ev){
     var data=new Uint8Array(ev.target.result);
-    var wb=XLSX.read(data,{type:'array',cellDates:true});
+    var wb=XLSX.read(data,{type:'array',cellDates:true,cellNF:false});
     var ws=wb.Sheets[wb.SheetNames[0]];
-    var raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'YYYY-MM-DD'});
+    var raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,dateNF:'YYYY-MM-DD'});
 
     impRows=[];
     var recRows=[];
@@ -894,46 +894,45 @@ function handleImp(e,tipo){
       var dataCell=row[1]?row[1].toString().trim():'';
 
       if(!fornec||!valorCell)return;
-      // Try parsing as number first (XLSX may return number or string)
+      // Parse value - raw:true means XLSX returns actual numbers
       var valor=0;
       var rawVal=row[8];
       if(typeof rawVal==='number'){
         valor=rawVal;
-      } else {
-        var valorStr=valorCell.toString().trim();
-        // Remove currency symbols and spaces
-        valorStr=valorStr.replace(/[R$\s]/g,'').trim();
-        // Brazilian format: 70.000,00 (dots=thousands, comma=decimal)
+      } else if(rawVal){
+        var valorStr=rawVal.toString().trim().replace(/[R$\s]/g,'');
+        // Handle Brazilian format strings: 70.000,00
         if(valorStr.indexOf(',')>-1 && valorStr.indexOf('.')>-1){
           valorStr=valorStr.replace(/\./g,'').replace(',','.');
         } else if(valorStr.indexOf(',')>-1){
-          // Only comma — could be decimal: 1399,20
-          var parts=valorStr.split(',');
-          if(parts[1]&&parts[1].length<=2){
-            valorStr=valorStr.replace(',','.');
-          } else {
-            valorStr=valorStr.replace(/,/g,'');
-          }
+          var pts=valorStr.split(',');
+          valorStr=pts[1]&&pts[1].length<=2?valorStr.replace(',','.'):valorStr.replace(/,/g,'');
         } else if(valorStr.indexOf('.')>-1){
-          // Only dots — check if thousands separator
-          var dparts=valorStr.split('.');
-          if(dparts[dparts.length-1].length===3){
-            // e.g. 70.000 — thousands separator, no decimals
-            valorStr=valorStr.replace(/\./g,'');
-          }
-          // else it's a decimal point, keep as is
+          var dps=valorStr.split('.');
+          if(dps[dps.length-1].length===3)valorStr=valorStr.replace(/\./g,'');
         }
         valor=parseFloat(valorStr)||0;
       }
       if(!valor||valor<=0)return;
 
-      var venc=dataCell||'';
-      if(venc&&venc.includes('/')){
-        var p=venc.split('/');
-        venc=p.length===3?(p[2].length===4?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'2026-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0')):'2026-06-30';
+      var venc='';
+      var rawDate=row[1];
+      if(rawDate instanceof Date){
+        venc=rawDate.toISOString().split('T')[0];
+      } else if(typeof rawDate==='number'&&rawDate>40000){
+        // Excel serial date
+        var d=new Date(Math.round((rawDate-25569)*86400*1000));
+        venc=d.toISOString().split('T')[0];
+      } else if(rawDate){
+        var ds=rawDate.toString().trim();
+        if(ds.includes('/')){
+          var p=ds.split('/');
+          venc=p.length===3?(p[2].length===4?p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0'):'2026-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0')):'2026-06-30';
+        } else if(ds.length>=10){
+          venc=ds.substring(0,10);
+        }
       }
       if(!venc||venc.length<8){venc='2026-06-30';}
-      if(venc.length===10&&venc.includes(' ')){venc=venc.split(' ')[0];}
 
       var isRec=mapTipoToRec(tipoCell);
       var cat=mapTipoCat(tipoCell);
