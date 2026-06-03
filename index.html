@@ -834,22 +834,24 @@ function chartInst(id,el,type,data){
 }
 
 function rDash(){
-  // Populate month selector
+  // Populate month selector first
   var mdSel=document.getElementById('MD');
   if(mdSel){
     var allMs=[...new Set([...REC,...PAG].map(function(x){return gm(x.vencimento);}))].sort();
     var curMd=mdSel.value;
-    var existing=[...mdSel.options].map(function(o){return o.value;});
+    // Rebuild options
+    var prevVal=mdSel.value;
+    mdSel.innerHTML='<option value="">Todos os meses</option>';
     allMs.forEach(function(m){
-      if(!existing.includes(m)){
-        var o=document.createElement('option');
-        o.value=m;
-        o.textContent=pd(m+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-        mdSel.appendChild(o);
-      }
+      var o=document.createElement('option');
+      o.value=m;
+      o.textContent=pd(m+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+      mdSel.appendChild(o);
     });
-    // Default to current month if exists
-    if(!curMd){
+    // Restore previous selection or default to current month
+    if(prevVal&&allMs.includes(prevVal)){
+      mdSel.value=prevVal;
+    } else if(!prevVal){
       var now=new Date();
       var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
       if(allMs.includes(curMes))mdSel.value=curMes;
@@ -1364,8 +1366,6 @@ window.addEventListener('DOMContentLoaded',function(){
   // Auth overlay is already visible by default in HTML
 });
 
-var origGoTab=goTab;
-goTab=function(t){saveEmpData();origGoTab(t);};
 
 // Auto-save on tab change
 var origGoTab=goTab;
