@@ -375,11 +375,10 @@ function gcf(){return (document.getElementById('CS')||{}).value||'';}
 var globalMes='';
 
 function syncMes(novoMes){
-  globalMes=novoMes; // empty string = Todos os meses
-  // Sync all month selectors
+  globalMes=novoMes;
   ['MD','MR','MP','MH'].forEach(function(id){
     var sel=document.getElementById(id);
-    if(sel)sel.value=novoMes;
+    if(sel&&sel.value!==novoMes)sel.value=novoMes;
   });
 }
 
@@ -419,27 +418,17 @@ function populateMesSel(selId, arr, keepVal){
     if(m===cur)opt.selected=true;
     sel.appendChild(opt);
   });
-  if(!cur&&ms.length){
-    // Use globalMes if set, else current month, else latest
-    if(globalMes&&ms.includes(globalMes)){
-      sel.value=globalMes;
-    } else {
-      var now=new Date();
-      var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-      if(ms.includes(curMes)){sel.value=curMes;globalMes=curMes;}
-      else{sel.value=ms[ms.length-1]||'';globalMes=sel.value;}
-    }
-  } else if(cur){
-    // Only update globalMes if it's not already empty (don't override "Todos")
-    if(globalMes!=='')globalMes=cur;
-  }
+  // Set selector value to globalMes
+  if(globalMes!==undefined)sel.value=globalMes;
 }
 
 function rRec(){
   populateMesSel('MR',REC);
   var b=(document.getElementById('BR')||{}).value||'';
   var f=(document.getElementById('FR')||{}).value||'';
-  var m=(document.getElementById('MR')||{}).value||globalMes||'';
+  var m=globalMes;
+  var mrSel=document.getElementById('MR');
+  if(mrSel)mrSel.value=globalMes;
   var cg=gcf();
   var d=REC.filter(function(i){return i.nome.toLowerCase().includes(b.toLowerCase())&&(!f||i.status===f)&&(!cg||i.conta===cg)&&(!m||gm(i.vencimento)===m);});
   var tb=document.getElementById('TBR');
@@ -459,7 +448,9 @@ function rPag(){
   populateMesSel('MP',PAG);
   var b=(document.getElementById('BP')||{}).value||'';
   var f=(document.getElementById('FP')||{}).value||'';
-  var m=(document.getElementById('MP')||{}).value||globalMes||'';
+  var m=globalMes;
+  var mpSel=document.getElementById('MP');
+  if(mpSel)mpSel.value=globalMes;
   var cg=gcf();
   var d=PAG.filter(function(i){return i.nome.toLowerCase().includes(b.toLowerCase())&&(!f||i.status===f)&&(!cg||i.conta===cg)&&(!m||gm(i.vencimento)===m);});
   var tb=document.getElementById('TBP');
@@ -654,7 +645,9 @@ function rHist(){
   var all=REC.map(function(x){return Object.assign({},x,{tipo:'rec',data:x.vencimento});})
     .concat(PAG.map(function(x){return Object.assign({},x,{tipo:'pag',data:x.vencimento});}));
   populateMesSel('MH',all);
-  var mh=(document.getElementById('MH')||{}).value||globalMes||'';
+  var mh=globalMes;
+  var mhSel=document.getElementById('MH');
+  if(mhSel)mhSel.value=globalMes;
   var d=all.filter(function(x){return x.nome.toLowerCase().includes(b.toLowerCase())&&(!f||x.tipo===f)&&(!mh||gm(x.vencimento)===mh);}).sort(function(a,b){return b.vencimento>a.vencimento?1:-1;});
   var el=document.getElementById('HIST');
   if(!d.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--tx3)">Nenhum lançamento registrado</div>';return;}
@@ -872,19 +865,18 @@ function rDash(){
       o.textContent=pd(m+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
       mdSel.appendChild(o);
     });
-    // Restore previous selection or default to current month
-    if(prevVal&&allMs.includes(prevVal)){
-      mdSel.value=prevVal;
-    } else if(!prevVal){
+    // Set to globalMes - if empty shows "Todos os meses"
+    mdSel.value=globalMes;
+    // On first load with data, default to current month
+    if(globalMes===''&&allMs.length){
       var now=new Date();
       var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-      if(allMs.includes(curMes))mdSel.value=curMes;
-      else if(allMs.length)mdSel.value=allMs[allMs.length-1];
+      if(allMs.includes(curMes)){globalMes=curMes;mdSel.value=curMes;}
+      else{globalMes=allMs[allMs.length-1];mdSel.value=globalMes;}
     }
   }
-  var selMes=mdSel?mdSel.value:'';
-  // Only use globalMes if selector has no value yet
-  if(selMes===''&&globalMes!=='')selMes=globalMes;
+  var selMes=globalMes;
+  if(mdSel)mdSel.value=globalMes;
   var cF=gcf();
   var fR=cF?REC.filter(function(x){return x.conta===cF;}):REC;
   var fP=cF?PAG.filter(function(x){return x.conta===cF;}):PAG;
