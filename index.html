@@ -734,12 +734,49 @@ function rDRE(){
 
 function expDRE(){
   var mes=(document.getElementById('DM')||{}).value||'';
-  var fr=REC.filter(function(x){return !mes||gm(x.vencimento)===mes;});
-  var fp=PAG.filter(function(x){return !mes||gm(x.vencimento)===mes;});
-  var csv='Tipo,Nome,Categoria,Conta,Valor,Vencimento,Status\n';
-  fr.forEach(function(i){csv+='Receber,"'+i.nome+'","'+i.cat+'","'+i.conta+'",'+i.valor.toFixed(2)+','+i.vencimento+','+i.status+'\n';});
-  fp.forEach(function(i){csv+='Pagar,"'+i.nome+'","'+i.cat+'","'+i.conta+'",'+i.valor.toFixed(2)+','+i.vencimento+','+i.status+'\n';});
-  var a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);a.download='dre_lac.csv';a.click();
+  var mesTxt=mes?pd(mes+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'}):'Todos os meses';
+  var fR=REC.filter(function(x){return !mes||gm(x.vencimento)===mes;});
+  var fP=PAG.filter(function(x){return !mes||gm(x.vencimento)===mes;});
+  var bruto=fR.reduce(function(a,b){return a+b.valor;},0);
+  var desp=fP.reduce(function(a,b){return a+b.valor;},0);
+  var lucro=bruto-desp;
+  var margem=bruto>0?Math.round(lucro/bruto*100):0;
+  var sess=JSON.parse(localStorage.getItem('lac-session')||'{}');
+  var empNome=sess.empNome||'LAC Finance';
+  var empCnpj=sess.empCnpj||'';
+  var byCatR={};fR.forEach(function(i){byCatR[i.cat]=(byCatR[i.cat]||0)+i.valor;});
+  var byCatP={};fP.forEach(function(i){byCatP[i.cat]=(byCatP[i.cat]||0)+i.valor;});
+
+  var rows=[];
+  rows.push([empNome,'','','','','','']);
+  rows.push(['CNPJ: '+empCnpj,'','','','','','']);
+  rows.push(['DRE — Demonstrativo de Resultado','','','','','','']);
+  rows.push(['Período: '+mesTxt,'','','','','','']);
+  rows.push(['Emitido em: '+new Date().toLocaleDateString('pt-BR'),'','','','','','']);
+  rows.push(['','','','','','','']);
+  rows.push(['RECEITAS','','','','','','']);
+  rows.push(['Categoria','Valor','','','','','']);
+  Object.keys(byCatR).forEach(function(c){rows.push([c,byCatR[c],'','','','','']);});
+  rows.push(['TOTAL RECEITAS',bruto,'','','','','']);
+  rows.push(['','','','','','','']);
+  rows.push(['DESPESAS','','','','','','']);
+  rows.push(['Categoria','Valor','','','','','']);
+  Object.keys(byCatP).forEach(function(c){rows.push([c,byCatP[c],'','','','','']);});
+  rows.push(['TOTAL DESPESAS',desp,'','','','','']);
+  rows.push(['','','','','','','']);
+  rows.push(['RESULTADO LÍQUIDO',lucro,'','','','','']);
+  rows.push(['MARGEM LÍQUIDA',margem+'%','','','','','']);
+  rows.push(['','','','','','','']);
+  rows.push(['DETALHE DOS LANÇAMENTOS','','','','','','']);
+  rows.push(['Tipo','Descrição','Categoria','Centro Custo','Valor','Vencimento','Status']);
+  fR.forEach(function(i){rows.push(['Receber',i.nome,i.cat,i.conta,i.valor,i.vencimento,i.status]);});
+  fP.forEach(function(i){rows.push(['Pagar',i.nome,i.cat,i.conta,i.valor,i.vencimento,i.status]);});
+
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:35},{wch:18},{wch:20},{wch:18},{wch:15},{wch:14},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws,'DRE');
+  XLSX.writeFile(wb,'DRE_'+empNome+'_'+mesTxt+'.xlsx');
 }
 
 function openContaMod(){
