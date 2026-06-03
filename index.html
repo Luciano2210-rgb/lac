@@ -1142,11 +1142,13 @@ function authLogin(){
   if(!u[e]){m.textContent='E-mail não cadastrado. Crie sua conta.';return;}
   if(u[e].pass!==btoa(p)){m.textContent='Senha incorreta.';return;}
   currentEmail=e;
+  localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,ts:Date.now()}));
   // PASSO 2: verificar empresas
-  var emps=u[e].empresas||[];
+  // Reload users to get latest data
+  var uFresh=gUsers();
+  var emps=(uFresh[e]&&uFresh[e].empresas)||[];
   if(emps.length===0){
     // Sem empresa - ir para cadastro
-    localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,ts:Date.now()}));
     showStep('STEP-ADD-EMP');
     document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showStep('STEP-LOGIN');};
     setupAddEmpBtn(e);
@@ -1201,6 +1203,12 @@ function setupAddEmpBtn(email){
 
 function showEmpSelect(name,empresas,email){
   currentEmail=email;
+  // Always reload fresh from localStorage
+  var uFresh=gUsers();
+  if(uFresh[email]&&uFresh[email].empresas&&uFresh[email].empresas.length>0){
+    empresas=uFresh[email].empresas;
+    name=uFresh[email].name||name;
+  }
   showStep('STEP-EMP');
   document.getElementById('WNAME').textContent=name;
   var el=document.getElementById('EMP-SELECT');
@@ -1352,35 +1360,8 @@ function showAddEmpToAccount(email){
 }
 
 window.addEventListener('DOMContentLoaded',function(){
-  try{
-    var s=localStorage.getItem('lac-session');
-    if(s){
-      var d=JSON.parse(s);
-      var now=Date.now();
-      var MAX=30*24*60*60*1000;
-      if(d&&d.name&&d.ts&&(now-d.ts)<MAX){
-        if(d.empKey){
-          var empData=gEmpData(d.empKey);
-          if(empData){
-            REC=empData.rec.map(cv);PAG=empData.pag.map(cv);
-            PARCS=empData.parcs||[];METAS=empData.metas||[];
-            CONTAS=empData.contas||CONTAS;
-            CONTS=CONTAS.map(function(c){return c.nome;});
-          }
-          enterApp(d.name,{nome:d.empNome||'',cnpj:d.empCnpj||''},d.empKey);
-          return;
-        } else if(d.email){
-          var u=gUsers();
-          if(u[d.email]&&u[d.email].empresas&&u[d.email].empresas.length>0){
-            document.getElementById('AUTH').style.display='flex';
-            showEmpSelect(d.name,u[d.email].empresas,d.email);
-            return;
-          }
-        }
-      }
-      localStorage.removeItem('lac-session');
-    }
-  }catch(e){localStorage.removeItem('lac-session');}
+  // Always show login screen - user must login every time
+  // Auth overlay is already visible by default in HTML
 });
 
 var origGoTab=goTab;
