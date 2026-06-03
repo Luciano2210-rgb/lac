@@ -168,14 +168,18 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div class="shell">
 
 <div id="tab-dash" class="tc on">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-    <div style="display:flex;align-items:center;gap:6px">
-      <i class="ti ti-calendar" style="color:var(--blue)"></i>
-      <select id="MD" onchange="rDash()" style="font-size:13px;padding:5px 10px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500;cursor:pointer">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--r);padding:10px 14px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <i class="ti ti-calendar" style="color:var(--blue);font-size:16px"></i>
+      <span style="font-size:12px;font-weight:500;color:var(--tx2)">Período:</span>
+      <select id="MD" onchange="rDash()" style="font-size:13px;padding:5px 10px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500;cursor:pointer;min-width:180px">
         <option value="">Todos os meses</option>
       </select>
     </div>
-    <div style="font-size:11px;color:var(--tx3)" id="DASH-PERIOD"></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="font-size:11px;color:var(--tx3)" id="DASH-PERIOD"></div>
+      <button class="bi" onclick="rDash()" style="padding:4px 8px;font-size:11px" title="Atualizar"><i class="ti ti-refresh"></i></button>
+    </div>
   </div>
   <div class="mx" id="MC"></div>
   <div id="VA" style="display:none" class="al"><i class="ti ti-alert-triangle"></i><span id="VM"></span></div>
@@ -1059,6 +1063,9 @@ function confImp(tipo){
   }
   saveEmpData();
   document.getElementById('IMP').remove();
+  // Reset month selector to show imported months
+  var mdSel=document.getElementById('MD');
+  if(mdSel){mdSel.innerHTML='<option value="">Todos os meses</option>';}
   rRec();rPag();rDash();
   alert(totalImp+' registros importados! Entradas em Receber, Saidas em Pagar.');
 }
@@ -1336,7 +1343,7 @@ window.addEventListener('DOMContentLoaded',function(){
     if(s){
       var d=JSON.parse(s);
       var now=Date.now();
-      var MAX=8*60*60*1000; // 8 horas
+      var MAX=30*24*60*60*1000; // 30 dias
       // Accept session with OR without empKey (backward compatibility)
       var validSession=d&&d.name&&d.ts&&(now-d.ts)<MAX;
       if(validSession){
