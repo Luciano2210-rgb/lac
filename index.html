@@ -372,16 +372,21 @@ function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function gcf(){return (document.getElementById('CS')||{}).value||'';}
 
 function goTab(t){
-  document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('on');});
-  document.querySelectorAll('.ni button').forEach(function(b){b.classList.remove('on');});
-  var el=document.getElementById('tab-'+t);
-  if(el)el.classList.add('on');
-  var tabs=['dash','rec','pag','parc','metas','hist','resum','dre','contas','notif'];
-  var idx=tabs.indexOf(t);
-  var btns=document.querySelectorAll('.ni button');
-  if(idx>=0&&btns[idx])btns[idx].classList.add('on');
-  var fns={dash:rDash,rec:rRec,pag:rPag,parc:rParc,metas:rMetas,hist:rHist,resum:rResum,dre:rDRE,contas:rContas,notif:rNotif};
-  if(fns[t])fns[t]();
+  try{
+    document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('on');});
+    document.querySelectorAll('.ni button').forEach(function(b){b.classList.remove('on');});
+    var el=document.getElementById('tab-'+t);
+    if(el)el.classList.add('on');
+    var tabs=['dash','rec','pag','parc','metas','hist','resum','dre','contas','notif'];
+    var idx=tabs.indexOf(t);
+    var btns=document.querySelectorAll('.ni button');
+    if(idx>=0&&btns[idx])btns[idx].classList.add('on');
+    var fns={dash:rDash,rec:rRec,pag:rPag,parc:rParc,metas:rMetas,hist:rHist,resum:rResum,dre:rDRE,contas:rContas,notif:rNotif};
+    if(fns[t])fns[t]();
+  }catch(err){
+    console.error('goTab error:',err);
+    alert('Erro ao abrir aba '+t+': '+err.message);
+  }
 }
 
 function getMeses(arr){
@@ -1368,10 +1373,11 @@ window.addEventListener('DOMContentLoaded',function(){
 
 
 // Auto-save on tab change
-var origGoTab=goTab;
+// Save data when leaving tabs
+var _origGoTab=goTab;
 goTab=function(t){
-  saveEmpData();
-  origGoTab(t);
+  try{saveEmpData();}catch(e){}
+  _origGoTab(t);
 };
 </script>
 </body>
