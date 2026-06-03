@@ -84,57 +84,77 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 
 <div id="AUTH" style="position:fixed;inset:0;background:#06285E;display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;overflow-y:auto">
   <div style="background:#fff;border-radius:16px;padding:1.75rem;width:100%;max-width:380px;margin:auto">
+
+    <!-- LOGO -->
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:4px">
       <i class="ti ti-chart-bar" style="color:#0A3D8F;font-size:20px"></i>
       <span style="font-size:18px;font-weight:500;color:#0A3D8F">LAC <small style="font-weight:400;font-size:12px;opacity:.7">Finance</small></span>
     </div>
     <div style="font-size:10px;color:#aaa;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:1.25rem">Gestão financeira inteligente</div>
-    <div style="display:flex;border-bottom:1px solid #eee;margin-bottom:1.25rem">
-      <div id="TAB1" style="flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;color:#0A3D8F;border-bottom:2px solid #0A3D8F;font-weight:500" onclick="authTab(1)">Entrar</div>
-      <div id="TAB2" style="flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;color:#aaa;border-bottom:2px solid transparent" onclick="authTab(2)">Criar conta</div>
-    </div>
 
-    <!-- FORM LOGIN -->
-    <div id="FORM1">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">E-mail</label>
-      <input id="L1" type="email" placeholder="seu@email.com" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Senha</label>
-      <input id="L2" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none">
-      <div id="LM" style="font-size:11px;color:#D85A30;min-height:18px;margin-top:6px;text-align:center"></div>
-      <button onclick="authLogin()" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px">Entrar</button>
-    </div>
-
-    <!-- FORM CADASTRO -->
-    <div id="FORM2" style="display:none">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Nome completo</label>
-      <input id="R1" type="text" placeholder="Seu nome" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">E-mail</label>
-      <input id="R2" type="email" placeholder="seu@email.com" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Senha (mín. 6 caracteres)</label>
-      <input id="R3" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
-      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Confirmar senha</label>
-      <input id="R4" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
-      <div style="border-top:1px solid #eee;padding-top:10px;margin-bottom:8px">
-        <div style="font-size:11px;font-weight:500;color:#0A3D8F;margin-bottom:8px"><i class="ti ti-building" style="vertical-align:-2px;margin-right:4px"></i>Adicionar empresa(s) do grupo</div>
-        <div id="EMP-LIST"></div>
-        <button onclick="addEmpField()" style="width:100%;padding:7px;background:#E6F1FB;color:#0A3D8F;border:1px dashed #0A3D8F;border-radius:8px;font-size:12px;cursor:pointer;margin-top:6px"><i class="ti ti-plus" style="vertical-align:-2px"></i> Adicionar empresa</button>
+    <!-- PASSO 1: LOGIN -->
+    <div id="STEP-LOGIN">
+      <div style="display:flex;border-bottom:1px solid #eee;margin-bottom:1.25rem">
+        <div id="TAB1" style="flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;color:#0A3D8F;border-bottom:2px solid #0A3D8F;font-weight:500" onclick="authTab(1)">Entrar</div>
+        <div id="TAB2" style="flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;color:#aaa;border-bottom:2px solid transparent" onclick="authTab(2)">Criar conta</div>
       </div>
-      <div id="RM" style="font-size:11px;min-height:18px;margin-top:4px;text-align:center"></div>
-      <button onclick="authReg()" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px">Criar minha conta</button>
+      <div id="FORM1">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">E-mail</label>
+        <input id="L1" type="email" placeholder="seu@email.com" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Senha</label>
+        <input id="L2" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none">
+        <div id="LM" style="font-size:11px;color:#D85A30;min-height:18px;margin-top:6px;text-align:center"></div>
+        <button onclick="authLogin()" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px">Entrar</button>
+      </div>
+      <div id="FORM2" style="display:none">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Nome completo</label>
+        <input id="R1" type="text" placeholder="Seu nome" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">E-mail</label>
+        <input id="R2" type="email" placeholder="seu@email.com" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Senha (mín. 6 caracteres)</label>
+        <input id="R3" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+        <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Confirmar senha</label>
+        <input id="R4" type="password" placeholder="••••••••" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none">
+        <div id="RM" style="font-size:11px;min-height:18px;margin-top:6px;text-align:center"></div>
+        <button onclick="authReg()" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px">Criar minha conta</button>
+      </div>
     </div>
 
-    <!-- SELEÇÃO DE EMPRESA -->
-    <div id="FORM3" style="display:none">
+    <!-- PASSO 2: SELECIONAR EMPRESA -->
+    <div id="STEP-EMP" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <button onclick="voltarLogin()" style="background:none;border:none;cursor:pointer;color:#888;font-size:13px;padding:0">← Voltar</button>
+      </div>
       <div style="text-align:center;margin-bottom:1rem">
-        <div style="font-size:14px;font-weight:500;color:#0A3D8F;margin-bottom:4px">Bem-vindo, <span id="WNAME"></span>!</div>
-        <div style="font-size:12px;color:#888">Selecione a empresa que deseja acessar:</div>
+        <div style="font-size:14px;font-weight:500;color:#0A3D8F">Bem-vindo, <span id="WNAME"></span>!</div>
+        <div style="font-size:12px;color:#888;margin-top:2px">Selecione a empresa:</div>
       </div>
       <div id="EMP-SELECT"></div>
+      <button id="BTN-ADD-EMP" style="width:100%;padding:8px;background:#E6F1FB;color:#0A3D8F;border:1px dashed #0A3D8F;border-radius:8px;font-size:12px;cursor:pointer;margin-top:8px">
+        <i class="ti ti-plus"></i> Adicionar nova empresa
+      </button>
+    </div>
+
+    <!-- PASSO 3: CADASTRAR EMPRESA -->
+    <div id="STEP-ADD-EMP" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <button id="BTN-VOLTAR-EMP" style="background:none;border:none;cursor:pointer;color:#888;font-size:13px;padding:0">← Voltar</button>
+      </div>
+      <div style="font-size:14px;font-weight:500;color:#0A3D8F;margin-bottom:1rem;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-building" style="font-size:16px"></i> Cadastrar empresa
+      </div>
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Razão social</label>
+      <input id="AEN" type="text" placeholder="Nome da empresa" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:3px">CNPJ</label>
+      <input id="AEC" type="text" placeholder="00.000.000/0000-00" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">
+      <div id="AEM" style="font-size:11px;min-height:16px;margin-bottom:6px;text-align:center"></div>
+      <button id="BTN-SAVE-EMP" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer">Salvar empresa</button>
     </div>
 
     <div style="font-size:10px;color:#ccc;text-align:center;margin-top:1rem">LAC Consultoria &copy; 2026</div>
   </div>
 </div>
+
 
 <header>
   <div class="hi">
@@ -1089,36 +1109,24 @@ function printRel(){
 
 // AUTH
 var currentEmpIdx=0;
-var empFields=0;
+var currentEmail='';
 
 function authTab(n){
   document.getElementById('TAB1').style.cssText='flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;'+(n===1?'color:#0A3D8F;border-bottom:2px solid #0A3D8F;font-weight:500':'color:#aaa;border-bottom:2px solid transparent');
   document.getElementById('TAB2').style.cssText='flex:1;padding:8px;text-align:center;font-size:13px;cursor:pointer;'+(n===2?'color:#0A3D8F;border-bottom:2px solid #0A3D8F;font-weight:500':'color:#aaa;border-bottom:2px solid transparent');
   document.getElementById('FORM1').style.display=n===1?'block':'none';
   document.getElementById('FORM2').style.display=n===2?'block':'none';
-  document.getElementById('FORM3').style.display='none';
-  if(n===2&&empFields===0)addEmpField();
 }
 
-function addEmpField(){
-  empFields++;
-  var id=empFields;
-  var el=document.getElementById('EMP-LIST');
-  var div=document.createElement('div');
-  div.id='EMP-'+id;
-  div.style.cssText='background:#f7f7f5;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid #eee';
-  div.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    +'<span style="font-size:11px;font-weight:500;color:#0A3D8F">Empresa '+id+'</span>'
-    +(id>1?'<button onclick="removeEmpField('+id+')" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:16px">&times;</button>':'')
-    +'</div>'
-    +'<input type="text" id="EN-'+id+'" placeholder="Razão social" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ddd;font-size:12px;outline:none;margin-bottom:6px">'
-    +'<input type="text" id="EC-'+id+'" placeholder="CNPJ (00.000.000/0000-00)" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ddd;font-size:12px;outline:none">';
-  el.appendChild(div);
+function showStep(step){
+  document.getElementById('STEP-LOGIN').style.display='none';
+  document.getElementById('STEP-EMP').style.display='none';
+  document.getElementById('STEP-ADD-EMP').style.display='none';
+  document.getElementById(step).style.display='block';
 }
 
-function removeEmpField(id){
-  var el=document.getElementById('EMP-'+id);
-  if(el)el.remove();
+function voltarLogin(){
+  showStep('STEP-LOGIN');
 }
 
 function gUsers(){try{return JSON.parse(localStorage.getItem('lac-users')||'{}');}catch(e){return {};}}
@@ -1133,94 +1141,49 @@ function authLogin(){
   var u=gUsers();
   if(!u[e]){m.textContent='E-mail não cadastrado. Crie sua conta.';return;}
   if(u[e].pass!==btoa(p)){m.textContent='Senha incorreta.';return;}
-  localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,empresas:u[e].empresas||[]}));
+  currentEmail=e;
+  // PASSO 2: verificar empresas
   var emps=u[e].empresas||[];
   if(emps.length===0){
-    // No companies - enter directly
+    // Sem empresa - ir para cadastro
     localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,ts:Date.now()}));
-    enterApp(u[e].name,null,null);
-  } else if(emps.length===1){
-    // Only one company - select automatically
-    selectEmp(e,0);
+    showStep('STEP-ADD-EMP');
+    document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showStep('STEP-LOGIN');};
+    setupAddEmpBtn(e);
   } else {
+    // Com empresa - mostrar seleção
     showEmpSelect(u[e].name,emps,e);
   }
 }
 
-function showEmpSelect(name,empresas,email){
-  document.getElementById('FORM1').style.display='none';
-  document.getElementById('FORM2').style.display='none';
-  document.getElementById('FORM3').style.display='block';
-  document.getElementById('WNAME').textContent=name;
-  var el=document.getElementById('EMP-SELECT');
-  if(!empresas||!empresas.length){
-    el.innerHTML='';
-    var msg=document.createElement('div');
-    msg.style.cssText='text-align:center;color:#888;font-size:12px;padding:1rem';
-    msg.textContent='Nenhuma empresa cadastrada.';
-    var btn=document.createElement('button');
-    btn.textContent='+ Adicionar empresa agora';
-    btn.style.cssText='margin-top:10px;padding:8px 16px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;display:block;width:100%';
-    btn.addEventListener('click',function(){showAddEmpToAccount(email);});
-    el.appendChild(msg);
-    el.appendChild(btn);
-    return;
-  }
-  el.innerHTML='';
-  empresas.forEach(function(emp,i){
-    var card=document.createElement('div');
-    card.style.cssText='display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #eee;border-radius:10px;margin-bottom:8px;cursor:pointer';
-    var icon=document.createElement('div');
-    icon.style.cssText='width:40px;height:40px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0';
-    icon.innerHTML='<i class="ti ti-building" style="color:#0A3D8F;font-size:18px"></i>';
-    var info=document.createElement('div');
-    var nome=document.createElement('div');
-    nome.style.cssText='font-weight:500;font-size:13px';
-    nome.textContent=emp.nome;
-    var cnpj=document.createElement('div');
-    cnpj.style.cssText='font-size:11px;color:#888';
-    cnpj.textContent='CNPJ: '+emp.cnpj;
-    info.appendChild(nome);info.appendChild(cnpj);
-    var arrow=document.createElement('i');
-    arrow.className='ti ti-chevron-right';
-    arrow.style.cssText='color:#aaa;margin-left:auto';
-    card.appendChild(icon);card.appendChild(info);card.appendChild(arrow);
-    card.addEventListener('click',function(){selectEmp(email,i);});
-    card.addEventListener('mouseover',function(){this.style.borderColor='#0A3D8F';});
-    card.addEventListener('mouseout',function(){this.style.borderColor='#eee';});
-    el.appendChild(card);
-  });
-  var addBtn=document.createElement('button');
-  addBtn.textContent='+ Adicionar outra empresa';
-  addBtn.style.cssText='width:100%;padding:8px;background:#E6F1FB;color:#0A3D8F;border:1px dashed #0A3D8F;border-radius:8px;font-size:12px;cursor:pointer;margin-top:4px';
-  addBtn.addEventListener('click',function(){showAddEmpToAccount(email);});
-  el.appendChild(addBtn);
+function authReg(){
+  var n=document.getElementById('R1').value.trim();
+  var e=document.getElementById('R2').value.trim().toLowerCase();
+  var p=document.getElementById('R3').value;
+  var p2=document.getElementById('R4').value;
+  var m=document.getElementById('RM');
+  if(!n||!e||!p||!p2){m.style.color='#D85A30';m.textContent='Preencha todos os campos.';return;}
+  if(p.length<6){m.style.color='#D85A30';m.textContent='Senha mínimo 6 caracteres.';return;}
+  if(p!==p2){m.style.color='#D85A30';m.textContent='Senhas não coincidem.';return;}
+  var u=gUsers();
+  if(u[e]){m.style.color='#D85A30';m.textContent='E-mail já cadastrado.';return;}
+  u[e]={name:n,pass:btoa(p),empresas:[]};
+  localStorage.setItem('lac-users',JSON.stringify(u));
+  localStorage.setItem('lac-session',JSON.stringify({email:e,name:n,ts:Date.now()}));
+  currentEmail=e;
+  m.style.color='#1D9E75';m.textContent='Conta criada! Cadastre sua empresa.';
+  setTimeout(function(){
+    showStep('STEP-ADD-EMP');
+    document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showStep('STEP-LOGIN');};
+    setupAddEmpBtn(e);
+  },800);
 }
-function showAddEmpToAccount(email){
-  document.getElementById('FORM3').style.display='none';
-  document.getElementById('FORM2').style.display='none';
-  document.getElementById('FORM1').style.display='none';
-  var overlay=document.getElementById('AUTH');
-  var box=overlay.querySelector('div');
-  var addDiv=document.createElement('div');
-  addDiv.id='FORM-ADD-EMP';
-  addDiv.innerHTML='<div style="font-size:14px;font-weight:500;color:#0A3D8F;margin-bottom:1rem;display:flex;align-items:center;gap:6px"><i class="ti ti-building" style="font-size:16px"></i> Adicionar empresa</div>'
-    +'<label style="display:block;font-size:11px;color:#666;margin-bottom:3px">Razão social</label>'
-    +'<input id="AEN" type="text" placeholder="Nome da empresa" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">'
-    +'<label style="display:block;font-size:11px;color:#666;margin-bottom:3px">CNPJ</label>'
-    +'<input id="AEC" type="text" placeholder="00.000.000/0000-00" style="width:100%;padding:9px;border-radius:8px;border:1px solid #ddd;font-size:13px;outline:none;margin-bottom:10px">'
-    +'<div id="AEM" style="font-size:11px;min-height:16px;margin-bottom:6px;text-align:center"></div>'
-    +'<div style="display:flex;gap:8px">'
-    +'<button id="AEB-CANCEL" style="flex:1;padding:9px;background:none;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;color:#666">Voltar</button>'
-    +'<button id="AEB-SAVE" style="flex:1;padding:9px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer">Salvar</button>'
-    +'</div>';
-  box.appendChild(addDiv);
-  document.getElementById('AEB-CANCEL').addEventListener('click',function(){
-    addDiv.remove();
-    var u=gUsers();
-    showEmpSelect(u[email].name,u[email].empresas||[],email);
-  });
-  document.getElementById('AEB-SAVE').addEventListener('click',function(){
+
+function setupAddEmpBtn(email){
+  document.getElementById('AEN').value='';
+  document.getElementById('AEC').value='';
+  document.getElementById('AEM').textContent='';
+  document.getElementById('BTN-SAVE-EMP').onclick=function(){
     var nome=document.getElementById('AEN').value.trim();
     var cnpj=document.getElementById('AEC').value.trim();
     var msg=document.getElementById('AEM');
@@ -1229,12 +1192,49 @@ function showAddEmpToAccount(email){
     if(!u[email].empresas)u[email].empresas=[];
     u[email].empresas.push({nome:nome,cnpj:cnpj||'Não informado'});
     localStorage.setItem('lac-users',JSON.stringify(u));
-    msg.style.color='#1D9E75';msg.textContent='Empresa adicionada!';
+    msg.style.color='#1D9E75';msg.textContent='Empresa cadastrada!';
     setTimeout(function(){
-      addDiv.remove();
       showEmpSelect(u[email].name,u[email].empresas,email);
     },600);
+  };
+}
+
+function showEmpSelect(name,empresas,email){
+  currentEmail=email;
+  showStep('STEP-EMP');
+  document.getElementById('WNAME').textContent=name;
+  var el=document.getElementById('EMP-SELECT');
+  el.innerHTML='';
+  empresas.forEach(function(emp,i){
+    var card=document.createElement('div');
+    card.style.cssText='display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #eee;border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s';
+    var icon=document.createElement('div');
+    icon.style.cssText='width:40px;height:40px;border-radius:10px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+    icon.innerHTML='<i class="ti ti-building" style="color:#0A3D8F;font-size:18px"></i>';
+    var info=document.createElement('div');
+    info.style.cssText='flex:1;min-width:0';
+    var nome=document.createElement('div');
+    nome.style.cssText='font-weight:500;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    nome.textContent=emp.nome;
+    var cnpj=document.createElement('div');
+    cnpj.style.cssText='font-size:11px;color:#888';
+    cnpj.textContent='CNPJ: '+emp.cnpj;
+    info.appendChild(nome);info.appendChild(cnpj);
+    var arrow=document.createElement('i');
+    arrow.className='ti ti-chevron-right';
+    arrow.style.color='#aaa';
+    card.appendChild(icon);card.appendChild(info);card.appendChild(arrow);
+    card.addEventListener('click',function(){selectEmp(email,i);});
+    card.addEventListener('mouseover',function(){this.style.borderColor='#0A3D8F';this.style.background='#f8fbff';});
+    card.addEventListener('mouseout',function(){this.style.borderColor='#eee';this.style.background='';});
+    el.appendChild(card);
   });
+  // Button to add new company
+  document.getElementById('BTN-ADD-EMP').onclick=function(){
+    showStep('STEP-ADD-EMP');
+    document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showEmpSelect(name,empresas,email);};
+    setupAddEmpBtn(email);
+  };
 }
 
 function selectEmp(email,idx){
@@ -1244,10 +1244,8 @@ function selectEmp(email,idx){
   var empKey=email+'_'+idx;
   var empData=gEmpData(empKey);
   if(empData){
-    REC=empData.rec.map(cv);
-    PAG=empData.pag.map(cv);
-    PARCS=empData.parcs||[];
-    METAS=empData.metas||[];
+    REC=empData.rec.map(cv);PAG=empData.pag.map(cv);
+    PARCS=empData.parcs||[];METAS=empData.metas||[];
     CONTAS=empData.contas||[{id:1,nome:'Bradesco',tipo:'Conta corrente',saldo:0,cor:'#185FA5'}];
     CONTS=CONTAS.map(function(c){return c.nome;});
   } else {
@@ -1262,35 +1260,11 @@ function selectEmp(email,idx){
 function saveEmpData(){
   var s=localStorage.getItem('lac-session');
   if(!s)return;
-  var sess=JSON.parse(s);
-  if(!sess.empKey)return;
-  sEmpData(sess.empKey,{rec:REC,pag:PAG,parcs:PARCS,metas:METAS,contas:CONTAS});
-}
-
-function authReg(){
-  var n=document.getElementById('R1').value.trim();
-  var e=document.getElementById('R2').value.trim().toLowerCase();
-  var p=document.getElementById('R3').value;
-  var p2=document.getElementById('R4').value;
-  var m=document.getElementById('RM');
-  if(!n||!e||!p||!p2){m.style.color='#D85A30';m.textContent='Preencha todos os campos.';return;}
-  if(p.length<6){m.style.color='#D85A30';m.textContent='Senha mínimo 6 caracteres.';return;}
-  if(p!==p2){m.style.color='#D85A30';m.textContent='Senhas não coincidem.';return;}
-  var u=gUsers();
-  if(u[e]){m.style.color='#D85A30';m.textContent='E-mail já cadastrado.';return;}
-  var empresas=[];
-  for(var i=1;i<=empFields;i++){
-    var enEl=document.getElementById('EN-'+i);
-    var ecEl=document.getElementById('EC-'+i);
-    if(enEl&&ecEl&&enEl.value.trim()){
-      empresas.push({nome:enEl.value.trim(),cnpj:ecEl.value.trim()||'Não informado'});
-    }
-  }
-  if(!empresas.length){m.style.color='#D85A30';m.textContent='Adicione pelo menos uma empresa.';return;}
-  u[e]={name:n,pass:btoa(p),empresas:empresas};
-  localStorage.setItem('lac-users',JSON.stringify(u));
-  m.style.color='#1D9E75';m.textContent='Conta criada! Selecione a empresa...';
-  setTimeout(function(){showEmpSelect(n,empresas,e);},800);
+  try{
+    var sess=JSON.parse(s);
+    if(!sess.empKey)return;
+    sEmpData(sess.empKey,{rec:REC,pag:PAG,parcs:PARCS,metas:METAS,contas:CONTAS});
+  }catch(e){}
 }
 
 function enterApp(name,emp,empKey){
@@ -1301,34 +1275,63 @@ function enterApp(name,emp,empKey){
     if(existing)existing.remove();
     var b=document.createElement('div');
     b.id='USER-BADGE';
-    b.style.cssText='display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)';
+    b.style.cssText='display:flex;align-items:center;gap:6px';
     var empNome=emp&&emp.nome?emp.nome:'';
-    var empCnpj=emp&&emp.cnpj&&emp.cnpj!=='Não informado'?'CNPJ: '+emp.cnpj:'';
-    b.innerHTML='<div style="display:flex;flex-direction:column;align-items:flex-end">'
-      +(empNome?'<span style="font-weight:500;color:var(--tx)">'+empNome+'</span>':'')
-      +'<span style="font-size:10px;color:var(--tx3)">'+(empCnpj?empCnpj+' · ':'')+name+'</span>'
-      +'</div>'
-      +(emp?'<button class="bi" onclick="trocaEmp()" style="font-size:11px;padding:3px 8px" title="Trocar empresa"><i class="ti ti-building"></i></button>':'')
-      +'<button class="bi" onclick="doLogout()" style="font-size:11px;padding:3px 8px" title="Sair"><i class="ti ti-logout"></i></button>';
+    var empCnpj=emp&&emp.cnpj&&emp.cnpj!=='Não informado'?emp.cnpj:'';
+    if(empNome){
+      var empBadge=document.createElement('div');
+      empBadge.style.cssText='display:flex;align-items:center;gap:6px;background:var(--bg2);border:0.5px solid var(--bd);border-radius:var(--r);padding:4px 10px;max-width:200px';
+      empBadge.innerHTML='<i class="ti ti-building" style="color:var(--blue);font-size:13px;flex-shrink:0"></i>'
+        +'<div style="min-width:0"><div style="font-weight:500;font-size:12px;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+empNome+'</div>'
+        +(empCnpj?'<div style="font-size:10px;color:var(--tx3)">'+empCnpj+'</div>':'')
+        +'</div>';
+      b.appendChild(empBadge);
+    }
+    var userSpan=document.createElement('span');
+    userSpan.style.cssText='font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:3px';
+    userSpan.innerHTML='<i class="ti ti-user-circle" style="font-size:14px"></i>'+name;
+    b.appendChild(userSpan);
+    if(emp){
+      var trocaBtn=document.createElement('button');
+      trocaBtn.className='bi';
+      trocaBtn.style.cssText='font-size:11px;padding:3px 8px';
+      trocaBtn.title='Trocar empresa';
+      trocaBtn.innerHTML='<i class="ti ti-building"></i>';
+      trocaBtn.onclick=trocaEmp;
+      b.appendChild(trocaBtn);
+    }
+    var sairBtn=document.createElement('button');
+    sairBtn.className='bi';
+    sairBtn.style.cssText='font-size:11px;padding:3px 8px';
+    sairBtn.title='Sair';
+    sairBtn.innerHTML='<i class="ti ti-logout"></i>';
+    sairBtn.onclick=doLogout;
+    b.appendChild(sairBtn);
     hdr.prepend(b);
   }
   var sel=document.getElementById('CS');
-  if(sel){sel.innerHTML='<option value="">Todas as contas</option>';CONTS.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});}
-  rDash();
-  rNotif();
+  if(sel){
+    sel.innerHTML='<option value="">Todas as contas</option>';
+    CONTS.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  }
+  rDash();rNotif();
 }
 
 function trocaEmp(){
   saveEmpData();
   var s=localStorage.getItem('lac-session');
   if(!s)return;
-  var sess=JSON.parse(s);
-  var u=gUsers();
-  if(!u[sess.email])return;
-  document.getElementById('AUTH').style.display='flex';
-  document.getElementById('FORM1').style.display='none';
-  document.getElementById('FORM2').style.display='none';
-  showEmpSelect(sess.name,u[sess.email].empresas,sess.email);
+  try{
+    var sess=JSON.parse(s);
+    var u=gUsers();
+    if(u[sess.email]){
+      localStorage.removeItem('lac-session');
+      document.getElementById('AUTH').style.display='flex';
+      var badge=document.getElementById('USER-BADGE');
+      if(badge)badge.remove();
+      showEmpSelect(sess.name,u[sess.email].empresas||[],sess.email);
+    }
+  }catch(e){}
 }
 
 function doLogout(){
@@ -1337,18 +1340,26 @@ function doLogout(){
   location.reload();
 }
 
+function showAddEmpToAccount(email){
+  showStep('STEP-ADD-EMP');
+  document.getElementById('BTN-VOLTAR-EMP').onclick=function(){
+    var u=gUsers();
+    var emps=u[email]&&u[email].empresas||[];
+    if(emps.length>0){showEmpSelect(u[email].name,emps,email);}
+    else{showStep('STEP-LOGIN');}
+  };
+  setupAddEmpBtn(email);
+}
+
 window.addEventListener('DOMContentLoaded',function(){
   try{
     var s=localStorage.getItem('lac-session');
     if(s){
       var d=JSON.parse(s);
       var now=Date.now();
-      var MAX=30*24*60*60*1000; // 30 dias
-      // Accept session with OR without empKey (backward compatibility)
-      var validSession=d&&d.name&&d.ts&&(now-d.ts)<MAX;
-      if(validSession){
+      var MAX=30*24*60*60*1000;
+      if(d&&d.name&&d.ts&&(now-d.ts)<MAX){
         if(d.empKey){
-          // Has company selected - load company data
           var empData=gEmpData(d.empKey);
           if(empData){
             REC=empData.rec.map(cv);PAG=empData.pag.map(cv);
@@ -1357,17 +1368,23 @@ window.addEventListener('DOMContentLoaded',function(){
             CONTS=CONTAS.map(function(c){return c.nome;});
           }
           enterApp(d.name,{nome:d.empNome||'',cnpj:d.empCnpj||''},d.empKey);
-        } else {
-          // Old session without company - enter app directly
-          enterApp(d.name,null,null);
+          return;
+        } else if(d.email){
+          var u=gUsers();
+          if(u[d.email]&&u[d.email].empresas&&u[d.email].empresas.length>0){
+            document.getElementById('AUTH').style.display='flex';
+            showEmpSelect(d.name,u[d.email].empresas,d.email);
+            return;
+          }
         }
-        return;
-      } else {
-        localStorage.removeItem('lac-session');
       }
+      localStorage.removeItem('lac-session');
     }
   }catch(e){localStorage.removeItem('lac-session');}
 });
+
+var origGoTab=goTab;
+goTab=function(t){saveEmpData();origGoTab(t);};
 
 // Auto-save on tab change
 var origGoTab=goTab;
