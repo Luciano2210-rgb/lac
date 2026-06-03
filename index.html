@@ -375,7 +375,7 @@ function gcf(){return (document.getElementById('CS')||{}).value||'';}
 var globalMes='';
 
 function syncMes(novoMes){
-  globalMes=novoMes;
+  globalMes=novoMes; // empty string = Todos os meses
   // Sync all month selectors
   ['MD','MR','MP','MH'].forEach(function(id){
     var sel=document.getElementById(id);
@@ -430,7 +430,8 @@ function populateMesSel(selId, arr, keepVal){
       else{sel.value=ms[ms.length-1]||'';globalMes=sel.value;}
     }
   } else if(cur){
-    globalMes=cur;
+    // Only update globalMes if it's not already empty (don't override "Todos")
+    if(globalMes!=='')globalMes=cur;
   }
 }
 
@@ -881,8 +882,9 @@ function rDash(){
       else if(allMs.length)mdSel.value=allMs[allMs.length-1];
     }
   }
-  var selMes=mdSel?mdSel.value:globalMes||'';
-  if(selMes!==globalMes)globalMes=selMes;
+  var selMes=mdSel?mdSel.value:'';
+  // Only use globalMes if selector has no value yet
+  if(selMes===''&&globalMes!=='')selMes=globalMes;
   var cF=gcf();
   var fR=cF?REC.filter(function(x){return x.conta===cF;}):REC;
   var fP=cF?PAG.filter(function(x){return x.conta===cF;}):PAG;
