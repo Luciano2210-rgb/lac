@@ -1127,7 +1127,17 @@ function authLogin(){
   if(!u[e]){m.textContent='E-mail não cadastrado. Crie sua conta.';return;}
   if(u[e].pass!==btoa(p)){m.textContent='Senha incorreta.';return;}
   localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,empresas:u[e].empresas||[]}));
-  showEmpSelect(u[e].name,u[e].empresas||[],e);
+  var emps=u[e].empresas||[];
+  if(emps.length===0){
+    // No companies - enter directly
+    localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,ts:Date.now()}));
+    enterApp(u[e].name,null,null);
+  } else if(emps.length===1){
+    // Only one company - select automatically
+    selectEmp(e,0);
+  } else {
+    showEmpSelect(u[e].name,emps,e);
+  }
 }
 
 function showEmpSelect(name,empresas,email){
@@ -1285,11 +1295,13 @@ function enterApp(name,emp,empKey){
     var b=document.createElement('div');
     b.id='USER-BADGE';
     b.style.cssText='display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)';
+    var empNome=emp&&emp.nome?emp.nome:'';
+    var empCnpj=emp&&emp.cnpj&&emp.cnpj!=='Não informado'?'CNPJ: '+emp.cnpj:'';
     b.innerHTML='<div style="display:flex;flex-direction:column;align-items:flex-end">'
-      +'<span style="font-weight:500;color:var(--tx)">'+(emp?emp.nome:'')+'</span>'
-      +'<span style="font-size:10px;color:var(--tx3)">'+(emp?'CNPJ: '+emp.cnpj:'')+' · '+name+'</span>'
+      +(empNome?'<span style="font-weight:500;color:var(--tx)">'+empNome+'</span>':'')
+      +'<span style="font-size:10px;color:var(--tx3)">'+(empCnpj?empCnpj+' · ':'')+name+'</span>'
       +'</div>'
-      +'<button class="bi" onclick="trocaEmp()" style="font-size:11px;padding:3px 8px" title="Trocar empresa"><i class="ti ti-building"></i></button>'
+      +(emp?'<button class="bi" onclick="trocaEmp()" style="font-size:11px;padding:3px 8px" title="Trocar empresa"><i class="ti ti-building"></i></button>':'')
       +'<button class="bi" onclick="doLogout()" style="font-size:11px;padding:3px 8px" title="Sair"><i class="ti ti-logout"></i></button>';
     hdr.prepend(b);
   }
@@ -1325,15 +1337,23 @@ window.addEventListener('DOMContentLoaded',function(){
       var d=JSON.parse(s);
       var now=Date.now();
       var MAX=8*60*60*1000; // 8 horas
-      if(d&&d.name&&d.empKey&&d.ts&&(now-d.ts)<MAX){
-        var empData=gEmpData(d.empKey);
-        if(empData){
-          REC=empData.rec.map(cv);PAG=empData.pag.map(cv);
-          PARCS=empData.parcs||[];METAS=empData.metas||[];
-          CONTAS=empData.contas||CONTAS;
-          CONTS=CONTAS.map(function(c){return c.nome;});
+      // Accept session with OR without empKey (backward compatibility)
+      var validSession=d&&d.name&&d.ts&&(now-d.ts)<MAX;
+      if(validSession){
+        if(d.empKey){
+          // Has company selected - load company data
+          var empData=gEmpData(d.empKey);
+          if(empData){
+            REC=empData.rec.map(cv);PAG=empData.pag.map(cv);
+            PARCS=empData.parcs||[];METAS=empData.metas||[];
+            CONTAS=empData.contas||CONTAS;
+            CONTS=CONTAS.map(function(c){return c.nome;});
+          }
+          enterApp(d.name,{nome:d.empNome||'',cnpj:d.empCnpj||''},d.empKey);
+        } else {
+          // Old session without company - enter app directly
+          enterApp(d.name,null,null);
         }
-        enterApp(d.name,{nome:d.empNome,cnpj:d.empCnpj},d.empKey);
         return;
       } else {
         localStorage.removeItem('lac-session');
