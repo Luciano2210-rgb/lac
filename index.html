@@ -192,7 +192,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
     <div style="display:flex;align-items:center;gap:8px">
       <i class="ti ti-calendar" style="color:var(--blue);font-size:16px"></i>
       <span style="font-size:12px;font-weight:500;color:var(--tx2)">Período:</span>
-      <select id="MD" onchange="rDash()" style="font-size:13px;padding:5px 10px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500;cursor:pointer;min-width:180px">
+      <select id="MD" onchange="syncMes(this.value);rDash()" style="font-size:13px;padding:5px 10px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500;cursor:pointer;min-width:180px">
         <option value="">Todos os meses</option>
       </select>
     </div>
@@ -216,7 +216,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div id="tab-rec" class="tc">
   <div class="card">
     <div class="tb">
-      <select id="MR" onchange="rRec()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
+      <select id="MR" onchange="syncMes(this.value);rRec()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
       <input type="text" id="BR" placeholder="Buscar..." oninput="rRec()">
       <select id="FR" onchange="rRec()"><option value="">Todos status</option><option value="pendente">Pendente</option><option value="pago">Pago</option><option value="vencido">Vencido</option></select>
       <button class="bim" onclick="openImp('rec')"><i class="ti ti-file-upload"></i> Excel</button>
@@ -233,7 +233,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div id="tab-pag" class="tc">
   <div class="card">
     <div class="tb">
-      <select id="MP" onchange="rPag()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
+      <select id="MP" onchange="syncMes(this.value);rPag()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
       <input type="text" id="BP" placeholder="Buscar..." oninput="rPag()">
       <select id="FP" onchange="rPag()"><option value="">Todos status</option><option value="pendente">Pendente</option><option value="pago">Pago</option><option value="vencido">Vencido</option></select>
       <button class="bim" onclick="openImp('pag')"><i class="ti ti-file-upload"></i> Excel</button>
@@ -266,7 +266,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div id="tab-hist" class="tc">
   <div class="card">
     <div class="tb">
-      <select id="MH" onchange="rHist()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
+      <select id="MH" onchange="syncMes(this.value);rHist()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx);font-weight:500"><option value="">Todos os meses</option></select>
       <input type="text" id="BH" placeholder="Buscar..." oninput="rHist()">
       <select id="FH" onchange="rHist()"><option value="">Todos</option><option value="rec">Entradas</option><option value="pag">Saídas</option></select>
       <button class="bim" onclick="openMod('rec')" style="margin-left:auto"><i class="ti ti-plus"></i> Entrada</button>
@@ -371,6 +371,18 @@ var CONTAS=[
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
 function gcf(){return (document.getElementById('CS')||{}).value||'';}
 
+// Global selected month - synced across all tabs
+var globalMes='';
+
+function syncMes(novoMes){
+  globalMes=novoMes;
+  // Sync all month selectors
+  ['MD','MR','MP','MH'].forEach(function(id){
+    var sel=document.getElementById(id);
+    if(sel)sel.value=novoMes;
+  });
+}
+
 function goTab(t){
   try{
     document.querySelectorAll('.tc').forEach(function(e){e.classList.remove('on');});
@@ -408,11 +420,17 @@ function populateMesSel(selId, arr, keepVal){
     sel.appendChild(opt);
   });
   if(!cur&&ms.length){
-    // Default to current month if exists, else latest
-    var now=new Date();
-    var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    if(ms.includes(curMes)){sel.value=curMes;}
-    else{sel.value=ms[ms.length-1]||'';}
+    // Use globalMes if set, else current month, else latest
+    if(globalMes&&ms.includes(globalMes)){
+      sel.value=globalMes;
+    } else {
+      var now=new Date();
+      var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+      if(ms.includes(curMes)){sel.value=curMes;globalMes=curMes;}
+      else{sel.value=ms[ms.length-1]||'';globalMes=sel.value;}
+    }
+  } else if(cur){
+    globalMes=cur;
   }
 }
 
@@ -420,7 +438,7 @@ function rRec(){
   populateMesSel('MR',REC);
   var b=(document.getElementById('BR')||{}).value||'';
   var f=(document.getElementById('FR')||{}).value||'';
-  var m=(document.getElementById('MR')||{}).value||'';
+  var m=(document.getElementById('MR')||{}).value||globalMes||'';
   var cg=gcf();
   var d=REC.filter(function(i){return i.nome.toLowerCase().includes(b.toLowerCase())&&(!f||i.status===f)&&(!cg||i.conta===cg)&&(!m||gm(i.vencimento)===m);});
   var tb=document.getElementById('TBR');
@@ -440,7 +458,7 @@ function rPag(){
   populateMesSel('MP',PAG);
   var b=(document.getElementById('BP')||{}).value||'';
   var f=(document.getElementById('FP')||{}).value||'';
-  var m=(document.getElementById('MP')||{}).value||'';
+  var m=(document.getElementById('MP')||{}).value||globalMes||'';
   var cg=gcf();
   var d=PAG.filter(function(i){return i.nome.toLowerCase().includes(b.toLowerCase())&&(!f||i.status===f)&&(!cg||i.conta===cg)&&(!m||gm(i.vencimento)===m);});
   var tb=document.getElementById('TBP');
@@ -635,7 +653,7 @@ function rHist(){
   var all=REC.map(function(x){return Object.assign({},x,{tipo:'rec',data:x.vencimento});})
     .concat(PAG.map(function(x){return Object.assign({},x,{tipo:'pag',data:x.vencimento});}));
   populateMesSel('MH',all);
-  var mh=(document.getElementById('MH')||{}).value||'';
+  var mh=(document.getElementById('MH')||{}).value||globalMes||'';
   var d=all.filter(function(x){return x.nome.toLowerCase().includes(b.toLowerCase())&&(!f||x.tipo===f)&&(!mh||gm(x.vencimento)===mh);}).sort(function(a,b){return b.vencimento>a.vencimento?1:-1;});
   var el=document.getElementById('HIST');
   if(!d.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--tx3)">Nenhum lançamento registrado</div>';return;}
@@ -863,7 +881,8 @@ function rDash(){
       else if(allMs.length)mdSel.value=allMs[allMs.length-1];
     }
   }
-  var selMes=mdSel?mdSel.value:'';
+  var selMes=mdSel?mdSel.value:globalMes||'';
+  if(selMes!==globalMes)globalMes=selMes;
   var cF=gcf();
   var fR=cF?REC.filter(function(x){return x.conta===cF;}):REC;
   var fP=cF?PAG.filter(function(x){return x.conta===cF;}):PAG;
