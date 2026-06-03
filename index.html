@@ -376,9 +376,10 @@ var globalMes='';
 
 function syncMes(novoMes){
   globalMes=novoMes;
+  if(novoMes===''){window._mesInitialized=true;} // keep as Todos
   ['MD','MR','MP','MH'].forEach(function(id){
     var sel=document.getElementById(id);
-    if(sel&&sel.value!==novoMes)sel.value=novoMes;
+    if(sel)sel.value=novoMes;
   });
 }
 
@@ -865,14 +866,15 @@ function rDash(){
       o.textContent=pd(m+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
       mdSel.appendChild(o);
     });
-    // Set to globalMes - if empty shows "Todos os meses"
+    // Set to globalMes
     mdSel.value=globalMes;
-    // On first load with data, default to current month
-    if(globalMes===''&&allMs.length){
+    // On FIRST load only (no data yet loaded before), default to current month
+    if(globalMes===''&&allMs.length&&REC.length+PAG.length>0&&!window._mesInitialized){
       var now=new Date();
       var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
       if(allMs.includes(curMes)){globalMes=curMes;mdSel.value=curMes;}
       else{globalMes=allMs[allMs.length-1];mdSel.value=globalMes;}
+      window._mesInitialized=true;
     }
   }
   var selMes=globalMes;
@@ -1297,6 +1299,8 @@ function saveEmpData(){
 
 function enterApp(name,emp,empKey){
   document.getElementById('AUTH').style.display='none';
+  globalMes='';
+  window._mesInitialized=false;
   var hdr=document.getElementById('HA');
   if(hdr){
     var existing=document.getElementById('USER-BADGE');
