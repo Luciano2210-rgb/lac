@@ -296,7 +296,8 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
       <div class="sc" style="margin:0"><i class="ti ti-report-analytics"></i> DRE</div>
       <div style="display:flex;gap:6px">
         <select id="DM" onchange="rDRE()" style="font-size:12px;padding:4px 8px;border-radius:var(--r);border:0.5px solid var(--bd2);background:var(--bg);color:var(--tx)"><option value="">Todos os meses</option></select>
-        <button class="bi" onclick="expDRE()"><i class="ti ti-download"></i> CSV</button>
+        <button class="bi" onclick="expDRE()"><i class="ti ti-file-spreadsheet"></i> Excel</button>
+        <button class="bi" onclick="printDRE()"><i class="ti ti-printer"></i> Imprimir</button>
       </div>
     </div>
     <div id="DRE"></div>
@@ -1109,6 +1110,65 @@ function confImp(tipo){
   if(mdSel){mdSel.innerHTML='<option value="">Todos os meses</option>';}
   rRec();rPag();rDash();
   alert(totalImp+' registros importados! Entradas em Receber, Saidas em Pagar.');
+}
+
+function printDRE(){
+  var mes=(document.getElementById('DM')||{}).value||'';
+  var mesTxt=mes?pd(mes+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'}):'Todos os meses';
+  var fR=REC.filter(function(x){return !mes||gm(x.vencimento)===mes;});
+  var fP=PAG.filter(function(x){return !mes||gm(x.vencimento)===mes;});
+  var bruto=fR.reduce(function(a,b){return a+b.valor;},0);
+  var desp=fP.reduce(function(a,b){return a+b.valor;},0);
+  var lucro=bruto-desp;
+  var margem=bruto>0?Math.round(lucro/bruto*100):0;
+  var byCatR={};fR.forEach(function(i){byCatR[i.cat]=(byCatR[i.cat]||0)+i.valor;});
+  var byCatP={};fP.forEach(function(i){byCatP[i.cat]=(byCatP[i.cat]||0)+i.valor;});
+
+  var sess=JSON.parse(localStorage.getItem('lac-session')||'{}');
+  var empNome=sess.empNome||'LAC Finance';
+  var empCnpj=sess.empCnpj||'';
+
+  var rowsR=Object.keys(byCatR).map(function(c){
+    return '<tr><td style="padding:6px 10px">'+c+'</td><td style="padding:6px 10px;text-align:right;color:#1D9E75">'+fm(byCatR[c])+'</td></tr>';
+  }).join('');
+  var rowsP=Object.keys(byCatP).map(function(c){
+    return '<tr><td style="padding:6px 10px">'+c+'</td><td style="padding:6px 10px;text-align:right;color:#D85A30">('+fm(byCatP[c])+')</td></tr>';
+  }).join('');
+
+  var w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>DRE - '+empNome+'</title>'
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:30px;font-size:13px;color:#1a1a18}'
+    +'h1{font-size:20px;font-weight:600;margin-bottom:2px}h2{font-size:13px;font-weight:500;margin:16px 0 6px;padding:6px 10px;background:#f0f0ec}'
+    +'.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #0A3D8F}'
+    +'.logo{color:#0A3D8F;font-size:22px;font-weight:700}.emp{font-size:11px;color:#666;margin-top:3px}'
+    +'.period{text-align:right;font-size:12px;color:#666}'
+    +'table{width:100%;border-collapse:collapse;margin-bottom:4px}'
+    +'tr:nth-child(even)td{background:#f9f9f7}'
+    +'.total td{font-weight:600;border-top:1px solid #ccc;border-bottom:2px solid #ccc;background:#f0f0ec!important}'
+    +'.resultado td{font-size:15px;font-weight:700;border-top:2px solid #0A3D8F;padding:10px}'
+    +'.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}'
+    +'.metric{background:#f5f5f2;padding:10px;border-radius:6px}'
+    +'.metric .l{font-size:10px;color:#888;margin-bottom:2px}'
+    +'.metric .v{font-size:16px;font-weight:600}'
+    +'@media print{body{padding:15px}}'
+    +'</style></head><body>');
+  w.document.write('<div class="header">'
+    +'<div><div class="logo">LAC Data-Driven Finance</div><div class="emp">'+empNome+(empCnpj?' · CNPJ: '+empCnpj:'')+'</div></div>'
+    +'<div class="period"><div>DRE — Demonstrativo de Resultado</div><div style="font-size:11px;color:#888">'+mesTxt+'</div><div style="font-size:11px;color:#888">Emitido em '+new Date().toLocaleDateString('pt-BR')+'</div></div>'
+    +'</div>');
+  w.document.write('<h2>RECEITAS</h2><table>'+rowsR
+    +'<tr class="total"><td style="padding:6px 10px">Total de Receitas</td><td style="padding:6px 10px;text-align:right;color:#1D9E75">'+fm(bruto)+'</td></tr></table>');
+  w.document.write('<h2>DESPESAS</h2><table>'+rowsP
+    +'<tr class="total"><td style="padding:6px 10px">Total de Despesas</td><td style="padding:6px 10px;text-align:right;color:#D85A30">('+fm(desp)+')</td></tr></table>');
+  w.document.write('<table style="margin-top:12px"><tr class="resultado"><td>Resultado Líquido</td><td style="text-align:right;color:'+(lucro>=0?'#1D9E75':'#D85A30')+'">'+fm(lucro)+'</td></tr></table>');
+  w.document.write('<div class="metrics">'
+    +'<div class="metric"><div class="l">Margem Líquida</div><div class="v" style="color:#0A3D8F">'+margem+'%</div></div>'
+    +'<div class="metric"><div class="l">Total Receitas</div><div class="v" style="color:#1D9E75">'+fm(bruto)+'</div></div>'
+    +'<div class="metric"><div class="l">Total Despesas</div><div class="v" style="color:#D85A30">'+fm(desp)+'</div></div>'
+    +'</div>');
+  w.document.write('</body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},400);
 }
 
 function printRel(){
