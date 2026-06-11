@@ -2051,6 +2051,7 @@ function startRealtime(sbCompanyId){
   if(!db||!sbCompanyId)return;
   // Cancel existing subscription
   if(_realtimeChannel){db.removeChannel(_realtimeChannel);_realtimeChannel=null;}
+  var _realtimeDebounce=null;
   _realtimeChannel=db.channel('lancamentos-'+sbCompanyId)
     .on('postgres_changes',{
       event:'*',
@@ -2058,22 +2059,22 @@ function startRealtime(sbCompanyId){
       table:'lancamentos',
       filter:'company_id=eq.'+sbCompanyId
     },function(payload){
-      console.log('Realtime update:', payload.eventType);
-      // Reload data silently
-      sbLoadLancamentos(sbCompanyId).then(function(){
-        // Refresh current view
-        var activeTab=document.querySelector('.tab-btn.active');
-        if(activeTab){
-          var tab=activeTab.getAttribute('data-tab')||'';
-          if(tab==='rec'||window.location.hash==='#rec')rRec();
-          else if(tab==='pag'||window.location.hash==='#pag')rPag();
-          else rDash();
-        } else {
-          rDash();
-        }
-        // Show subtle notification
-        showRealtimeToast(payload.eventType);
-      });
+      // Debounce — aguarda 2 segundos antes de atualizar para evitar múltiplos disparos
+      clearTimeout(_realtimeDebounce);
+      _realtimeDebounce=setTimeout(function(){
+        sbLoadLancamentos(sbCompanyId).then(function(){
+          // Só atualiza a aba atual — não recarrega o dashboard automaticamente
+          var activeTab=document.querySelector('.nav-link.active, [data-tab].active');
+          var currentTab=activeTab?activeTab.getAttribute('data-tab')||activeTab.textContent:'';
+          if(currentTab.indexOf('Receber')>=0||currentTab==='rec'){
+            rRec();
+          } else if(currentTab.indexOf('Pagar')>=0||currentTab==='pag'){
+            rPag();
+          }
+          // Mostra notificação discreta
+          showRealtimeToast(payload.eventType);
+        });
+      },2000);
     })
     .subscribe();
 }
