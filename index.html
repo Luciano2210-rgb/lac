@@ -2052,7 +2052,6 @@ function startRealtime(sbCompanyId){
   // Cancel existing subscription
   if(_realtimeChannel){db.removeChannel(_realtimeChannel);_realtimeChannel=null;}
   var _realtimeDebounce=null;
-  var _realtimeLoading=false;
   _realtimeChannel=db.channel('lancamentos-'+sbCompanyId)
     .on('postgres_changes',{
       event:'*',
@@ -2060,20 +2059,11 @@ function startRealtime(sbCompanyId){
       table:'lancamentos',
       filter:'company_id=eq.'+sbCompanyId
     },function(payload){
-      // Ignora eventos gerados pelo próprio usuário (evita loop)
-      var sess=JSON.parse(localStorage.getItem('lac-session')||'{}');
-      // Debounce de 3 segundos + lock para evitar chamadas simultâneas
+      // Apenas mostra notificação — não recarrega dados automaticamente
       clearTimeout(_realtimeDebounce);
       _realtimeDebounce=setTimeout(function(){
-        if(_realtimeLoading)return;
-        _realtimeLoading=true;
-        sbLoadLancamentos(sbCompanyId).then(function(){
-          _realtimeLoading=false;
-          showRealtimeToast(payload.eventType);
-        }).catch(function(){
-          _realtimeLoading=false;
-        });
-      },3000);
+        showRealtimeToast(payload.eventType);
+      },1000);
     })
     .subscribe();
 }
