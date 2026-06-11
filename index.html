@@ -1663,9 +1663,18 @@ function selectInvitedEmp(email, inviteData){
   }));
 
   // Load lancamentos from Supabase
-  sbLoadLancamentos(sbCompId).then(function(){
+  console.log('selectInvitedEmp: sbCompId=', sbCompId, 'inviteData=', inviteData);
+  if(!sbCompId){
+    console.log('selectInvitedEmp: sbCompId vazio!');
+    REC=[];PAG=[];
     enterApp(userName,{nome:empNome,cnpj:empCnpj},'inv_'+sbCompId);
-  }).catch(function(){
+    return;
+  }
+  sbLoadLancamentos(sbCompId).then(function(){
+    console.log('selectInvitedEmp: carregou', REC.length, 'rec e', PAG.length, 'pag');
+    enterApp(userName,{nome:empNome,cnpj:empCnpj},'inv_'+sbCompId);
+  }).catch(function(e){
+    console.log('selectInvitedEmp: erro', e);
     REC=[];PAG=[];
     enterApp(userName,{nome:empNome,cnpj:empCnpj},'inv_'+sbCompId);
   });
