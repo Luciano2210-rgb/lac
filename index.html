@@ -262,7 +262,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div id="tab-parc" class="tc">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div class="sc" style="margin:0"><i class="ti ti-calendar-repeat"></i> Parcelamentos</div>
-    <button class="ba" style="margin-left:0" onclick="openParcMod()"><i class="ti ti-plus"></i> Novo</button>
+    <button class="ba" style="margin-left:0" onclick="openParcMod()" id="BTN-NEW-PARC"><i class="ti ti-plus"></i> Novo</button>
   </div>
   <div id="PARC"></div>
 </div>
@@ -319,7 +319,7 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 <div id="tab-contas" class="tc">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
     <div class="sc" style="margin:0"><i class="ti ti-building-bank"></i> Contas bancárias</div>
-    <button class="ba" style="margin-left:0" onclick="openContaMod()"><i class="ti ti-plus"></i> Nova conta</button>
+    <button class="ba" style="margin-left:0" onclick="openContaMod()" id="BTN-NEW-CONTA"><i class="ti ti-plus"></i> Nova conta</button>
   </div>
   <div id="CONTAS"></div>
 </div>
@@ -598,7 +598,7 @@ function delIt(tipo,id){
   if(tipo==='rec')rRec();else rPag();
 }
 
-function openParcMod(){
+function openParcMod(){if(!isAdmin()){alert('Sem permissão.');return;}
   var co=CONTS.map(function(c){return '<option>'+c+'</option>';}).join('');
   document.getElementById('MBC').innerHTML='<h2>Novo parcelamento</h2>'
     +'<div class="fr"><label>Descrição</label><input type="text" id="PN" placeholder="Ex: Notebook Dell"></div>'
@@ -827,7 +827,7 @@ function expDRE(){
   XLSX.writeFile(wb,'DRE_'+empNome+'_'+mesTxt+'.xlsx');
 }
 
-function openContaMod(){
+function openContaMod(){if(!isAdmin()){alert('Sem permissão.');return;}
   document.getElementById('MBC').innerHTML='<h2>Nova conta bancária</h2>'
     +'<div class="fr"><label>Nome</label><input type="text" id="CON" placeholder="Ex: Caixa Econômica"></div>'
     +'<div class="fr"><label>Tipo</label><select id="COT"><option>Conta corrente</option><option>Poupança</option><option>Conta digital</option><option>Caixa</option></select></div>'
@@ -2155,6 +2155,20 @@ function enterApp(name,emp,empKey){
   // Iniciar sincronização em tempo real
   var sess2=JSON.parse(localStorage.getItem('lac-session')||'{}');
   if(sess2.sbCompanyId)startRealtime(sess2.sbCompanyId);
+  // Esconder botões de edição para visualizador
+  applyRolePermissions();
+}
+
+function applyRolePermissions(){
+  var admin=isAdmin();
+  var btns=['BTN-NEW-PARC','BTN-NEW-CONTA'];
+  btns.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.display=admin?'':'none';
+  });
+  // Esconder botão Novo Lançamento flutuante para visualizador
+  var fab=document.getElementById('FAB-NEW');
+  if(fab)fab.style.display=admin?'flex':'none';
 }
 
 function trocaEmp(){
