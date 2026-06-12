@@ -1935,7 +1935,13 @@ function authLogin(){
     // Encontrou no localStorage
     if(u[e].pass!==btoa(p)){m.style.color='#D85A30';m.textContent='Senha incorreta.';return;}
     currentEmail=e;
-    var sessRole=e===SUPER_ADMIN_EMAIL?'superadmin':(u[e].role||'admin');
+    // Verifica super admin ANTES de qualquer outra coisa
+    if(e.trim().toLowerCase()===SUPER_ADMIN_EMAIL.trim().toLowerCase()){
+      localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,role:'superadmin',ts:Date.now()}));
+      showSuperAdminDashboard();
+      return;
+    }
+    var sessRole=u[e].role||'admin';
     localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,role:sessRole,ts:Date.now()}));
     doPostLogin(e,u[e].name);
   } else {
@@ -1949,6 +1955,12 @@ function authLogin(){
       uLocal[e]={name:sbUser.name,pass:sbUser.pass,empresas:[],role:sbUser.role||'admin'};
       localStorage.setItem('lac-users',JSON.stringify(uLocal));
       currentEmail=e;
+      // Verifica super admin
+      if(e.trim().toLowerCase()===SUPER_ADMIN_EMAIL.trim().toLowerCase()){
+        localStorage.setItem('lac-session',JSON.stringify({email:e,name:sbUser.name,role:'superadmin',ts:Date.now()}));
+        showSuperAdminDashboard();
+        return;
+      }
       localStorage.setItem('lac-session',JSON.stringify({email:e,name:sbUser.name,ts:Date.now()}));
       doPostLogin(e,sbUser.name);
     }).catch(function(){
