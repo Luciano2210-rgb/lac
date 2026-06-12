@@ -145,44 +145,6 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
     </div>
 
     <!-- PASSO 3: CADASTRAR EMPRESA -->
-    <div id="STEP-SUPERADMIN" style="display:none">
-      <div style="min-height:100vh;background:var(--bg3)">
-        <!-- Header -->
-        <div style="background:#0A3D8F;padding:16px;display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:10px">
-            <i class="ti ti-shield-star" style="color:white;font-size:22px"></i>
-            <div>
-              <div style="color:white;font-weight:600;font-size:15px">LAC Finance</div>
-              <div style="color:#7BB3F0;font-size:11px">Painel de Controle</div>
-            </div>
-          </div>
-          <button onclick="superAdminLogout()" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer"><i class="ti ti-logout"></i> Sair</button>
-        </div>
-        <!-- Stats -->
-        <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="SA-STAT-CARDS">
-          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:22px;font-weight:700;color:#1D9E75" id="SA-CT-ACTIVE">-</div>
-            <div style="font-size:11px;color:#666">Ativas</div>
-          </div>
-          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:22px;font-weight:700;color:#854F0B" id="SA-CT-PENDING">-</div>
-            <div style="font-size:11px;color:#666">Pendentes</div>
-          </div>
-          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:22px;font-weight:700;color:#D85A30" id="SA-CT-BLOCKED">-</div>
-            <div style="font-size:11px;color:#666">Bloqueadas</div>
-          </div>
-        </div>
-        <!-- List -->
-        <div style="padding:0 16px 16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <div style="font-weight:600;font-size:13px;color:var(--tx)">Empresas cadastradas</div>
-            <button onclick="loadSuperAdminData()" style="background:#0A3D8F;color:white;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer"><i class="ti ti-refresh"></i> Atualizar</button>
-          </div>
-          <div id="SA-COMPANIES-LIST"><div style="text-align:center;padding:2rem;color:#888">Carregando...</div></div>
-        </div>
-      </div>
-    </div>
 
     <div id="STEP-PENDING" style="display:none">
       <div style="text-align:center;padding:2rem 1rem">
@@ -222,6 +184,29 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
   </div>
 </div>
 
+<div id="STEP-SUPERADMIN" style="display:none;position:fixed;inset:0;z-index:9998;overflow-y:auto;background:#F3F4F6">
+  <div>
+    <div style="background:#0A3D8F;padding:16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1">
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="ti ti-shield-star" style="color:white;font-size:22px"></i>
+        <div><div style="color:white;font-weight:600;font-size:15px">LAC Finance</div><div style="color:#7BB3F0;font-size:11px">Painel de Controle</div></div>
+      </div>
+      <button onclick="superAdminLogout()" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer"><i class="ti ti-logout"></i> Sair</button>
+    </div>
+    <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:white;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:#1D9E75" id="SA-CT-ACTIVE">-</div><div style="font-size:11px;color:#666">Ativas</div></div>
+      <div style="background:white;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:#854F0B" id="SA-CT-PENDING">-</div><div style="font-size:11px;color:#666">Pendentes</div></div>
+      <div style="background:white;border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:700;color:#D85A30" id="SA-CT-BLOCKED">-</div><div style="font-size:11px;color:#666">Bloqueadas</div></div>
+    </div>
+    <div style="padding:0 16px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:600;font-size:13px">Empresas cadastradas</div>
+        <button onclick="loadSuperAdminData()" style="background:#0A3D8F;color:white;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer"><i class="ti ti-refresh"></i> Atualizar</button>
+      </div>
+      <div id="SA-COMPANIES-LIST"><div style="text-align:center;padding:2rem;color:#888">Carregando...</div></div>
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="hi">
