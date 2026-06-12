@@ -1270,10 +1270,10 @@ async function rSuperAdmin(){
       +'</div>'
       +'</div>'
       +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
-      +(st!=='active'?'<button onclick="superApprove(''+c.id+'',''+c.owner_email+'')" style="padding:5px 12px;font-size:11px;background:#0A3D8F;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Aprovar</button>':'')
-      +(st==='active'?'<button onclick="superBlock(''+c.id+'')" style="padding:5px 12px;font-size:11px;background:#D85A30;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-ban"></i> Bloquear</button>':'')
-      +(st==='blocked'?'<button onclick="superApprove(''+c.id+'',''+c.owner_email+'')" style="padding:5px 12px;font-size:11px;background:#1D9E75;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Reativar</button>':'')
-      +'<button onclick="superSetValidade(''+c.id+'')" style="padding:5px 12px;font-size:11px;background:white;color:#0A3D8F;border:1px solid #0A3D8F;border-radius:6px;cursor:pointer"><i class="ti ti-calendar"></i> Validade</button>'
+      +(st!=='active'?'<button data-cid="'+c.id+'" data-email="'+c.owner_email+'" onclick="superApprove(this.dataset.cid,this.dataset.email)" style="padding:5px 12px;font-size:11px;background:#0A3D8F;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Aprovar</button>':'')
+      +(st==='active'?'<button data-cid="'+c.id+'" onclick="superBlock(this.dataset.cid)" style="padding:5px 12px;font-size:11px;background:#D85A30;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-ban"></i> Bloquear</button>':'')
+      +(st==='blocked'?'<button data-cid="'+c.id+'" data-email="'+c.owner_email+'" onclick="superApprove(this.dataset.cid,this.dataset.email)" style="padding:5px 12px;font-size:11px;background:#1D9E75;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Reativar</button>':'')
+      +'<button data-cid="'+c.id+'" onclick="superSetValidade(this.dataset.cid)" style="padding:5px 12px;font-size:11px;background:white;color:#0A3D8F;border:1px solid #0A3D8F;border-radius:6px;cursor:pointer"><i class="ti ti-calendar"></i> Validade</button>'
       +'</div>'
       +'</div>';
   }).join('');
