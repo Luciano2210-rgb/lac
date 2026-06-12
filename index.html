@@ -1960,7 +1960,9 @@ function authLogin(){
 function doPostLogin(e,name){
   var m=document.getElementById('LM');
   // Super admin vai direto para painel de controle
-  if(e===SUPER_ADMIN_EMAIL){
+  var cleanEmail=e.trim().toLowerCase();
+  var cleanSuper=SUPER_ADMIN_EMAIL.trim().toLowerCase();
+  if(cleanEmail===cleanSuper){
     currentEmail=e;
     localStorage.setItem('lac-session',JSON.stringify({email:e,name:name,role:'superadmin',ts:Date.now()}));
     showSuperAdminDashboard();
