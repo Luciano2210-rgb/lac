@@ -1738,10 +1738,21 @@ function authTab(n){
 }
 
 function showStep(step){
-  document.getElementById('STEP-LOGIN').style.display='none';
-  document.getElementById('STEP-EMP').style.display='none';
-  document.getElementById('STEP-ADD-EMP').style.display='none';
-  document.getElementById(step).style.display='block';
+  ['STEP-LOGIN','STEP-EMP','STEP-ADD-EMP','STEP-PENDING','STEP-SUPERADMIN'].forEach(function(s){
+    var el=document.getElementById(s);
+    if(el)el.style.display='none';
+  });
+  var target=document.getElementById(step);
+  if(target)target.style.display='block';
+  // Super admin step não usa o AUTH container
+  var auth=document.getElementById('AUTH');
+  if(auth){
+    if(step==='STEP-SUPERADMIN'){
+      auth.style.display='none';
+    } else {
+      auth.style.display='flex';
+    }
+  }
 }
 
 function voltarLogin(){
