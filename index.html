@@ -636,14 +636,15 @@ function rParc(){
       +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:4px"><span>'+p.pago+'/'+p.nparc+' pagas</span><span>'+pct+'%</span></div>'
       +'<div class="pb"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div>'
       +'<div style="display:flex;gap:5px;margin-top:8px">'
-      +(p.pago<p.nparc?'<button class="bic" onclick="pgParc('+p.id+')"><i class="ti ti-check"></i> Registrar parcela</button>':'<span style="font-size:11px;color:#3B6D11">✓ Quitado</span>')
-      +'<button class="bic" onclick="delParc('+p.id+')" style="margin-left:auto"><i class="ti ti-trash"></i></button></div></div>';
+      +(isAdmin()?(p.pago<p.nparc?'<button class="bic" onclick="pgParc('+p.id+')"><i class="ti ti-check"></i> Registrar parcela</button>':'<span style="font-size:11px;color:#3B6D11">✓ Quitado</span>'):'<span style="font-size:11px;color:#3B6D11">'+(p.pago<p.nparc?p.pago+'/'+p.nparc+' pagas':'✓ Quitado')+'</span>')
+      +(isAdmin()?'<button class="bic" onclick="delParc('+p.id+')" style="margin-left:auto"><i class="ti ti-trash"></i></button>':'')
+      +'</div></div>';
   }).join('');
 }
-function pgParc(id){var p=PARCS.find(function(x){return x.id===id;});if(p&&p.pago<p.nparc)p.pago++;rParc();}
-function delParc(id){PARCS=PARCS.filter(function(x){return x.id!==id;});rParc();}
+function pgParc(id){if(!isAdmin())return;var p=PARCS.find(function(x){return x.id===id;});if(p&&p.pago<p.nparc)p.pago++;saveEmpData();rParc();}
+function delParc(id){if(!isAdmin())return;if(!confirm('Excluir parcelamento?'))return;PARCS=PARCS.filter(function(x){return x.id!==id;});saveEmpData();rParc();}
 
-function openMetaMod(){
+function openMetaMod(){if(!isAdmin()){alert('Sem permissão para criar metas.');return;}
   var ms=[...new Set([...REC,...PAG].map(function(x){return gm(x.vencimento);}))].sort();
   var mh=ms.map(function(m){return '<option value="'+m+'">'+pd(m+'-01').toLocaleDateString('pt-BR',{month:'long',year:'numeric'})+'</option>';}).join('');
   document.getElementById('MBC').innerHTML='<h2>Nova meta</h2>'
@@ -682,10 +683,11 @@ function rMetas(){
       +'<div class="pb"><div class="pf" style="width:'+pct+'%;background:'+col+'"></div></div>'
       +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-top:4px">'
       +'<span>'+pct+'% '+(ok?'✓ Atingida':'concluído')+'</span>'
-      +'<button class="bic" onclick="delMeta('+m.id+')" style="font-size:11px"><i class="ti ti-trash"></i></button></div></div>';
+      +(isAdmin()?'<button class="bic" onclick="delMeta('+m.id+')" style="font-size:11px"><i class="ti ti-trash"></i></button>':'')
+      +'</div></div>';
   }).join('');
 }
-function delMeta(id){METAS=METAS.filter(function(x){return x.id!==id;});rMetas();}
+function delMeta(id){if(!isAdmin())return;if(!confirm('Excluir meta?'))return;METAS=METAS.filter(function(x){return x.id!==id;});saveEmpData();rMetas();}
 
 function rHist(){
   var b=(document.getElementById('BH')||{}).value||'';
@@ -846,7 +848,7 @@ function saveConta(){
   closeMod();rContas();
 }
 
-function editConta(id){
+function editConta(id){if(!isAdmin())return;
   var ct=CONTAS.find(function(x){return x.id===id;});
   if(!ct)return;
   document.getElementById('MBC').innerHTML='<h2><i class="ti ti-building-bank" style="color:'+ct.cor+';margin-right:6px"></i>'+ct.nome+'</h2>'
@@ -873,7 +875,7 @@ function updConta(id){
   closeMod();rContas();
 }
 
-function delConta(id){
+function delConta(id){if(!isAdmin()){alert('Sem permissão.');return;}
   if(!confirm('Excluir esta conta bancária?'))return;
   CONTAS=CONTAS.filter(function(x){return x.id!==id;});
   closeMod();rContas();
@@ -897,11 +899,12 @@ function rContas(){
     +'</tr></thead><tbody>'
     +CONTAS.map(function(c){
       var pct=total>0?Math.round(c.saldo/total*100):0;
-      return '<tr style="cursor:pointer" onclick="editConta('+c.id+')" title="Clique para editar">'
+      var admin=isAdmin();
+      return '<tr style="cursor:'+(admin?'pointer':'default')+'"'+(admin?' onclick="editConta('+c.id+')" title="Clique para editar"':'')+' >'
         +'<td style="padding:8px;border-bottom:0.5px solid var(--bd)">'
         +'<div style="display:flex;align-items:center;gap:8px">'
         +'<div style="width:28px;height:28px;border-radius:50%;background:'+c.cor+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-building-bank" style="color:'+c.cor+';font-size:13px"></i></div>'
-        +'<span style="font-weight:500;color:var(--blue)">'+c.nome+' <span style="font-size:10px">✎</span></span>'
+        +'<span style="font-weight:500;color:var(--blue)">'+c.nome+(admin?' <span style="font-size:10px">✎</span>':'')+'</span>'
         +'</div></td>'
         +'<td style="padding:8px;border-bottom:0.5px solid var(--bd);color:var(--tx2)">'+c.tipo+'</td>'
         +'<td style="padding:8px;border-bottom:0.5px solid var(--bd);font-weight:500;color:'+(c.saldo>=0?'#1D9E75':'#D85A30')+'">'+fm(c.saldo)+'</td>'
@@ -912,8 +915,8 @@ function rContas(){
         +'</div></td>'
         +'<td style="padding:8px;border-bottom:0.5px solid var(--bd)">'
         +'<div style="display:flex;gap:4px">'
-        +'<button class="bic" onclick="event.stopPropagation();editConta('+c.id+')" title="Editar"><i class="ti ti-edit"></i></button>'
-        +'<button class="bic" onclick="event.stopPropagation();delConta('+c.id+')" title="Excluir" style="color:#D85A30;border-color:#F09595"><i class="ti ti-trash"></i></button>'
+        +(admin?'<button class="bic" onclick="event.stopPropagation();editConta('+c.id+')" title="Editar"><i class="ti ti-edit"></i></button>':'')
+        +(admin?'<button class="bic" onclick="event.stopPropagation();delConta('+c.id+')" title="Excluir" style="color:#D85A30;border-color:#F09595"><i class="ti ti-trash"></i></button>':'')
         +'</div></td>'
         +'</tr>';
     }).join('')+'</tbody></table>';
