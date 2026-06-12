@@ -145,6 +145,25 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
     </div>
 
     <!-- PASSO 3: CADASTRAR EMPRESA -->
+    <div id="STEP-PENDING" style="display:none">
+      <div style="text-align:center;padding:2rem 1rem">
+        <div style="width:72px;height:72px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+          <i class="ti ti-clock-hour-4" style="font-size:36px;color:#854F0B"></i>
+        </div>
+        <div style="font-size:16px;font-weight:500;color:var(--tx);margin-bottom:8px">Cadastro em análise</div>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:4px">Sua empresa <strong id="PENDING-EMP-NAME"></strong> foi cadastrada com sucesso!</div>
+        <div style="font-size:13px;color:var(--tx3);margin-bottom:1.5rem">Aguarde a aprovação do administrador. Você receberá acesso em breve.</div>
+        <div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px;margin-bottom:1.5rem;text-align:left">
+          <div style="font-size:12px;font-weight:500;color:#0369A1;margin-bottom:4px"><i class="ti ti-info-circle"></i> O que acontece agora?</div>
+          <div style="font-size:12px;color:#0369A1">1. Nosso time analisa seu cadastro</div>
+          <div style="font-size:12px;color:#0369A1">2. Você recebe confirmação de acesso</div>
+          <div style="font-size:12px;color:#0369A1">3. Acesse o sistema normalmente</div>
+        </div>
+        <button onclick="checkApprovalStatus()" style="width:100%;padding:10px;background:#0A3D8F;color:white;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-bottom:8px"><i class="ti ti-refresh"></i> Verificar status</button>
+        <button onclick="showStep('STEP-LOGIN')" style="width:100%;padding:10px;background:transparent;color:#888;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer">Voltar ao login</button>
+      </div>
+    </div>
+
     <div id="STEP-ADD-EMP" style="display:none">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
         <button id="BTN-VOLTAR-EMP" style="background:none;border:none;cursor:pointer;color:#888;font-size:13px;padding:0">← Voltar</button>
@@ -347,6 +366,8 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
 
 <script>
 var SUPABASE_URL='https://lizkfasqwyuzidickhel.supabase.co';
+var SUPER_ADMIN_EMAIL='admin@lac.com'; // Email do super admin (dono do sistema)
+function isSuperAdmin(){try{return (JSON.parse(localStorage.getItem('lac-session')||'{}').email||'')=== SUPER_ADMIN_EMAIL;}catch(e){return false;}}
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpemtmYXNxd3l1emlkaWNraGVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0OTE1MzUsImV4cCI6MjA5NjA2NzUzNX0.EdXz1gs2vK9er5DdN7Q8ysMhg41h-9uAJAH4gmQOjZc';
 var _supaClient=null;
 function getSupa(){
@@ -1198,6 +1219,98 @@ function confImp(tipo){
   alert(totalImp+' registros importados! Entradas em Receber, Saidas em Pagar.');
 }
 
+async function rSuperAdmin(){
+  var el=document.getElementById('tab-admin');
+  if(!el)return;
+  el.innerHTML='<div style="padding:1rem 0">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">'
+    +'<div style="font-weight:500;font-size:14px"><i class="ti ti-shield-star" style="color:#0A3D8F;margin-right:6px"></i>Painel Super Admin</div>'
+    +'<div id="SA-STATS" style="font-size:12px;color:var(--tx3)">Carregando...</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;margin-bottom:12px">'
+    +'<button onclick="rSuperAdmin()" style="padding:5px 10px;font-size:11px;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer"><i class="ti ti-refresh"></i> Atualizar</button>'
+    +'</div>'
+    +'<div id="SA-LIST"><div style="text-align:center;padding:2rem;color:var(--tx3)">Carregando...</div></div></div>';
+  var db=getSupa();
+  if(!db){document.getElementById('SA-LIST').innerHTML='Erro ao conectar.';return;}
+  var r=await db.from('companies').select('*').order('created_at',{ascending:false});
+  var companies=r.data||[];
+  var r2=await db.from('users').select('email,name,created_at');
+  var users=r2.data||[];
+  var r3=await db.from('company_users').select('company_id,email,status');
+  var cuAll=r3.data||[];
+  var pending=companies.filter(function(c){return c.status==='pending'||!c.status;}).length;
+  var active=companies.filter(function(c){return c.status==='active';}).length;
+  var blocked=companies.filter(function(c){return c.status==='blocked';}).length;
+  document.getElementById('SA-STATS').innerHTML=
+    '<span style="color:#1D9E75;font-weight:500">'+active+' ativas</span> · '
+    +'<span style="color:#854F0B;font-weight:500">'+pending+' pendentes</span> · '
+    +'<span style="color:#D85A30">'+blocked+' bloqueadas</span> · '
+    +users.length+' usuários';
+  var listEl=document.getElementById('SA-LIST');
+  if(!companies.length){listEl.innerHTML='<div style="text-align:center;padding:3rem;color:var(--tx3)">Nenhuma empresa cadastrada ainda.</div>';return;}
+  listEl.innerHTML=companies.map(function(c){
+    var st=c.status||'pending';
+    var stColor=st==='active'?'#1D9E75':st==='blocked'?'#D85A30':'#854F0B';
+    var stBg=st==='active'?'#ECFDF5':st==='blocked'?'#FEF2F2':'#FEF3C7';
+    var stLabel=st==='active'?'Ativa':st==='blocked'?'Bloqueada':'Pendente';
+    var cu=cuAll.filter(function(x){return x.company_id===c.id;});
+    var cuApproved=cu.filter(function(x){return x.status==='approved';}).length;
+    var createdAt=c.created_at?new Date(c.created_at).toLocaleDateString('pt-BR'):'';
+    var validade=c.validade?new Date(c.validade).toLocaleDateString('pt-BR'):'Sem validade';
+    return '<div class="card" style="margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'
+      +'<div style="flex:1">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">'
+      +'<span style="font-weight:500;font-size:13px">'+c.name+'</span>'
+      +'<span style="font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;background:'+stBg+';color:'+stColor+'">'+stLabel+'</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">'+c.owner_email+' · CNPJ: '+(c.cnpj||'-')+'</div>'
+      +'<div style="font-size:11px;color:var(--tx3)">Cadastro: '+createdAt+' · Validade: '+validade+' · '+cuApproved+' usuário(s)</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +(st!=='active'?'<button onclick="superApprove(''+c.id+'',''+c.owner_email+'')" style="padding:5px 12px;font-size:11px;background:#0A3D8F;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Aprovar</button>':'')
+      +(st==='active'?'<button onclick="superBlock(''+c.id+'')" style="padding:5px 12px;font-size:11px;background:#D85A30;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-ban"></i> Bloquear</button>':'')
+      +(st==='blocked'?'<button onclick="superApprove(''+c.id+'',''+c.owner_email+'')" style="padding:5px 12px;font-size:11px;background:#1D9E75;color:white;border:none;border-radius:6px;cursor:pointer"><i class="ti ti-check"></i> Reativar</button>':'')
+      +'<button onclick="superSetValidade(''+c.id+'')" style="padding:5px 12px;font-size:11px;background:white;color:#0A3D8F;border:1px solid #0A3D8F;border-radius:6px;cursor:pointer"><i class="ti ti-calendar"></i> Validade</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+async function superApprove(compId, ownerEmail){
+  var db=getSupa();if(!db)return;
+  var dias=prompt('Quantos dias de acesso? (ex: 30, 60, 90, 365)', '30');
+  if(!dias)return;
+  var validade=new Date();
+  validade.setDate(validade.getDate()+parseInt(dias));
+  var validadeStr=validade.toISOString().split('T')[0];
+  await db.from('companies').update({status:'active',validade:validadeStr}).eq('id',compId);
+  alert('✅ Empresa aprovada! Acesso liberado por '+dias+' dias (até '+validade.toLocaleDateString('pt-BR')+').');
+  rSuperAdmin();
+}
+
+async function superBlock(compId){
+  if(!confirm('Bloquear acesso desta empresa?'))return;
+  var db=getSupa();if(!db)return;
+  await db.from('companies').update({status:'blocked'}).eq('id',compId);
+  alert('Empresa bloqueada.');
+  rSuperAdmin();
+}
+
+async function superSetValidade(compId){
+  var dias=prompt('Novo prazo em dias a partir de hoje:', '30');
+  if(!dias)return;
+  var db=getSupa();if(!db)return;
+  var validade=new Date();
+  validade.setDate(validade.getDate()+parseInt(dias));
+  var validadeStr=validade.toISOString().split('T')[0];
+  await db.from('companies').update({validade:validadeStr}).eq('id',compId);
+  alert('Validade atualizada até '+validade.toLocaleDateString('pt-BR'));
+  rSuperAdmin();
+}
+
 function rAdmin(){
   var adminBtn=document.getElementById('btn-admin');
   if(!isAdmin()){
@@ -1207,6 +1320,11 @@ function rAdmin(){
     return;
   }
   if(adminBtn)adminBtn.style.display='flex';
+  // Super admin vê painel de todas as empresas
+  if(isSuperAdmin()){
+    rSuperAdmin();
+    return;
+  }
   var sess=JSON.parse(localStorage.getItem('lac-session')||'{}');
   var empKey=sess.empKey||'';
   var sbCompId=sess.sbCompanyId||null;
@@ -1738,13 +1856,18 @@ function doPostLogin(e,name){
     }
     localStorage.setItem('lac-users',JSON.stringify(uFresh));
     var emps=(uFresh[e]&&uFresh[e].empresas)||[];
-    var ownEmps=emps.filter(function(x){return !x.pendingJoin;});
+    var ownEmps=emps.filter(function(x){return !x.pendingJoin&&!x.pendingApproval;});
     if(ownEmps.length===0&&sbInvited.length===0){
-      showStep('STEP-ADD-EMP');
-      document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showStep('STEP-LOGIN');};
-      setupAddEmpBtn(e);
+      var pendingComp=emps.find(function(x){return x.pendingApproval;});
+      if(pendingComp){
+        showPendingApproval(pendingComp.nome);
+      } else {
+        showStep('STEP-ADD-EMP');
+        document.getElementById('BTN-VOLTAR-EMP').onclick=function(){showStep('STEP-LOGIN');};
+        setupAddEmpBtn(e);
+      }
     } else {
-      showEmpSelect(uFresh[e].name,emps,e,sbInvited);
+      sbCheckCompanyStatus(e,emps,sbInvited,uFresh[e].name);
     }
   }).catch(function(){
     var uFresh=gUsers();
@@ -1819,6 +1942,89 @@ function authReg(){
   });
 }
 
+async function sbCheckCompanyStatus(email, emps, sbInvited, name){
+  var db=getSupa();
+  if(!db){showEmpSelect(name,emps,email,sbInvited);return;}
+  // Check owned companies status
+  var ownEmps=emps.filter(function(x){return !x.pendingJoin&&!x.pendingApproval&&x.sbId;});
+  if(ownEmps.length>0){
+    var sbId=ownEmps[0].sbId;
+    var r=await db.from('companies').select('status,validade,name').eq('id',sbId).limit(1);
+    var comp=r.data&&r.data[0];
+    if(comp){
+      if(comp.status==='blocked'){
+        showBlockedScreen(comp.name);
+        return;
+      }
+      if(comp.status==='pending'||!comp.status){
+        showPendingApproval(comp.name);
+        return;
+      }
+      // Check validade
+      if(comp.validade){
+        var hoje=new Date();
+        var val=new Date(comp.validade);
+        if(val<hoje){
+          showExpiredScreen(comp.name,comp.validade);
+          return;
+        }
+      }
+    }
+  }
+  showEmpSelect(name,emps,email,sbInvited);
+}
+
+function showBlockedScreen(empNome){
+  showStep('STEP-PENDING');
+  var el=document.getElementById('PENDING-EMP-NAME');
+  if(el)el.textContent=empNome;
+  var card=document.querySelector('#STEP-PENDING > div');
+  if(card){
+    card.querySelector('.ti-clock-hour-4').className='ti ti-ban';
+    card.querySelector('.ti-clock-hour-4').parentElement.style.background='#FEF2F2';
+    card.querySelector('.ti-clock-hour-4').style.color='#D85A30';
+  }
+  var title=document.querySelector('#STEP-PENDING [style*="font-size:16px"]');
+  if(title)title.textContent='Acesso bloqueado';
+  var sub=document.querySelector('#STEP-PENDING [style*="font-size:13px"]');
+  if(sub)sub.textContent='Entre em contato com o suporte para regularizar seu acesso.';
+}
+
+function showExpiredScreen(empNome, validade){
+  showStep('STEP-PENDING');
+  var el=document.getElementById('PENDING-EMP-NAME');
+  if(el)el.textContent=empNome;
+  var title=document.querySelector('#STEP-PENDING [style*="font-size:16px"]');
+  if(title)title.textContent='Acesso expirado';
+  var val=new Date(validade).toLocaleDateString('pt-BR');
+  var sub=document.querySelector('#STEP-PENDING [style*="font-size:13px"]');
+  if(sub)sub.textContent='Seu acesso expirou em '+val+'. Renove para continuar.';
+}
+
+async function checkApprovalStatus(){
+  var sess=JSON.parse(localStorage.getItem('lac-session')||'{}');
+  if(!sess.email)return;
+  var db=getSupa();
+  if(!db){alert('Erro de conexão. Tente novamente.');return;}
+  var r=await db.from('companies').select('status,name').eq('owner_email',sess.email).limit(1);
+  var comp=r.data&&r.data[0];
+  if(!comp){alert('Empresa não encontrada.');return;}
+  if(comp.status==='active'){
+    alert('✅ Sua empresa foi aprovada! Faça login para acessar.');
+    showStep('STEP-LOGIN');
+  } else if(comp.status==='blocked'){
+    alert('❌ Acesso bloqueado. Entre em contato com o suporte.');
+  } else {
+    alert('⏳ Seu cadastro ainda está em análise. Aguarde.');
+  }
+}
+
+function showPendingApproval(empNome){
+  showStep('STEP-PENDING');
+  var el=document.getElementById('PENDING-EMP-NAME');
+  if(el)el.textContent=empNome;
+}
+
 function setupAddEmpBtn(email){
   document.getElementById('AEN').value='';
   document.getElementById('AEC').value='';
@@ -1869,13 +2075,13 @@ function setupAddEmpBtn(email){
           });
         }
       } else {
-        // Empresa nova — cria no Supabase
+        // Empresa nova — cria no Supabase com status pending
         return sbSaveCompany(email,nome,cnpjRaw).then(function(comp){
           var sbId=comp?comp.id:null;
-          u[email].empresas.push({nome:nome,cnpj:cnpjRaw,sbId:sbId});
+          u[email].empresas.push({nome:nome,cnpj:cnpjRaw,sbId:sbId,pendingApproval:true});
           localStorage.setItem('lac-users',JSON.stringify(u));
           msg.style.color='#1D9E75';msg.textContent='Empresa cadastrada!';
-          setTimeout(function(){showEmpSelect(u[email].name,u[email].empresas,email);},600);
+          setTimeout(function(){showPendingApproval(nome);},600);
         });
       }
     }).catch(function(){
