@@ -145,6 +145,45 @@ footer{text-align:center;color:var(--tx3);font-size:11px;padding:20px 0 10px;bor
     </div>
 
     <!-- PASSO 3: CADASTRAR EMPRESA -->
+    <div id="STEP-SUPERADMIN" style="display:none">
+      <div style="min-height:100vh;background:var(--bg3)">
+        <!-- Header -->
+        <div style="background:#0A3D8F;padding:16px;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <i class="ti ti-shield-star" style="color:white;font-size:22px"></i>
+            <div>
+              <div style="color:white;font-weight:600;font-size:15px">LAC Finance</div>
+              <div style="color:#7BB3F0;font-size:11px">Painel de Controle</div>
+            </div>
+          </div>
+          <button onclick="superAdminLogout()" style="background:rgba(255,255,255,0.15);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer"><i class="ti ti-logout"></i> Sair</button>
+        </div>
+        <!-- Stats -->
+        <div style="padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px" id="SA-STAT-CARDS">
+          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#1D9E75" id="SA-CT-ACTIVE">-</div>
+            <div style="font-size:11px;color:#666">Ativas</div>
+          </div>
+          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#854F0B" id="SA-CT-PENDING">-</div>
+            <div style="font-size:11px;color:#666">Pendentes</div>
+          </div>
+          <div style="background:white;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#D85A30" id="SA-CT-BLOCKED">-</div>
+            <div style="font-size:11px;color:#666">Bloqueadas</div>
+          </div>
+        </div>
+        <!-- List -->
+        <div style="padding:0 16px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-weight:600;font-size:13px;color:var(--tx)">Empresas cadastradas</div>
+            <button onclick="loadSuperAdminData()" style="background:#0A3D8F;color:white;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer"><i class="ti ti-refresh"></i> Atualizar</button>
+          </div>
+          <div id="SA-COMPANIES-LIST"><div style="text-align:center;padding:2rem;color:#888">Carregando...</div></div>
+        </div>
+      </div>
+    </div>
+
     <div id="STEP-PENDING" style="display:none">
       <div style="text-align:center;padding:2rem 1rem">
         <div style="width:72px;height:72px;border-radius:50%;background:#FEF3C7;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
@@ -1219,6 +1258,78 @@ function confImp(tipo){
   alert(totalImp+' registros importados! Entradas em Receber, Saidas em Pagar.');
 }
 
+function showSuperAdminDashboard(){
+  // Hide auth, show super admin panel
+  document.getElementById('AUTH').style.display='none';
+  showStep('STEP-SUPERADMIN');
+  loadSuperAdminData();
+}
+
+function superAdminLogout(){
+  localStorage.removeItem('lac-session');
+  document.getElementById('AUTH').style.display='flex';
+  showStep('STEP-LOGIN');
+}
+
+async function loadSuperAdminData(){
+  var listEl=document.getElementById('SA-COMPANIES-LIST');
+  if(listEl)listEl.innerHTML='<div style="text-align:center;padding:2rem;color:#888"><i class="ti ti-loader ti-spin"></i> Carregando...</div>';
+  var db=getSupa();
+  if(!db){if(listEl)listEl.innerHTML='Erro ao conectar.';return;}
+  var r=await db.from('companies').select('*').order('created_at',{ascending:false});
+  var companies=r.data||[];
+  var r2=await db.from('users').select('email,name,created_at');
+  var users=r2.data||[];
+  var r3=await db.from('company_users').select('company_id,email,status');
+  var cuAll=r3.data||[];
+  // Update stats
+  var active=companies.filter(function(c){return c.status==='active';}).length;
+  var pending=companies.filter(function(c){return c.status==='pending'||!c.status;}).length;
+  var blocked=companies.filter(function(c){return c.status==='blocked';}).length;
+  var actEl=document.getElementById('SA-CT-ACTIVE');
+  var penEl=document.getElementById('SA-CT-PENDING');
+  var blkEl=document.getElementById('SA-CT-BLOCKED');
+  if(actEl)actEl.textContent=active;
+  if(penEl)penEl.textContent=pending;
+  if(blkEl)blkEl.textContent=blocked;
+  if(!listEl)return;
+  if(!companies.length){
+    listEl.innerHTML='<div style="text-align:center;padding:3rem;color:#888">Nenhuma empresa cadastrada ainda.</div>';
+    return;
+  }
+  listEl.innerHTML=companies.map(function(c){
+    var st=c.status||'pending';
+    var stColor=st==='active'?'#1D9E75':st==='blocked'?'#D85A30':'#854F0B';
+    var stBg=st==='active'?'#ECFDF5':st==='blocked'?'#FEF2F2':'#FEF3C7';
+    var stLabel=st==='active'?'Ativa':st==='blocked'?'Bloqueada':'Pendente';
+    var cu=cuAll.filter(function(x){return x.company_id===c.id;});
+    var cuCount=cu.filter(function(x){return x.status==='approved';}).length;
+    var createdAt=c.created_at?new Date(c.created_at).toLocaleDateString('pt-BR'):'';
+    var validade=c.validade?new Date(c.validade).toLocaleDateString('pt-BR'):'Sem validade';
+    var vencido=c.validade&&new Date(c.validade)<new Date();
+    return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:10px;border-left:3px solid '+stColor+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+      +'<div style="flex:1">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'
+      +'<span style="font-weight:600;font-size:14px">'+c.name+'</span>'
+      +'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:'+stBg+';color:'+stColor+'">'+stLabel+'</span>'
+      +(vencido?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:#FEF2F2;color:#D85A30">Expirada</span>':'')
+      +'</div>'
+      +'<div style="font-size:11px;color:#666">'+c.owner_email+'</div>'
+      +'<div style="font-size:11px;color:#999">CNPJ: '+(c.cnpj||'-')+' · Cadastro: '+createdAt+'</div>'
+      +'<div style="font-size:11px;color:#999">Validade: '+validade+' · '+cuCount+' usuário(s)</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +(st==='pending'?'<button data-cid="'+c.id+'" data-email="'+c.owner_email+'" onclick="superApprove(this.dataset.cid,this.dataset.email)" style="padding:6px 14px;font-size:11px;background:#0A3D8F;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500"><i class="ti ti-check"></i> Aprovar</button>':'')
+      +(st==='active'?'<button data-cid="'+c.id+'" onclick="superBlock(this.dataset.cid)" style="padding:6px 14px;font-size:11px;background:#D85A30;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500"><i class="ti ti-ban"></i> Bloquear</button>':'')
+      +(st==='blocked'?'<button data-cid="'+c.id+'" data-email="'+c.owner_email+'" onclick="superApprove(this.dataset.cid,this.dataset.email)" style="padding:6px 14px;font-size:11px;background:#1D9E75;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:500"><i class="ti ti-check"></i> Reativar</button>':'')
+      +'<button data-cid="'+c.id+'" onclick="superSetValidade(this.dataset.cid)" style="padding:6px 14px;font-size:11px;background:white;color:#0A3D8F;border:1px solid #0A3D8F;border-radius:8px;cursor:pointer;font-weight:500"><i class="ti ti-calendar"></i> Validade</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
 async function rSuperAdmin(){
   var el=document.getElementById('tab-admin');
   if(!el)return;
@@ -1813,7 +1924,8 @@ function authLogin(){
     // Encontrou no localStorage
     if(u[e].pass!==btoa(p)){m.style.color='#D85A30';m.textContent='Senha incorreta.';return;}
     currentEmail=e;
-    localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,ts:Date.now()}));
+    var sessRole=e===SUPER_ADMIN_EMAIL?'superadmin':(u[e].role||'admin');
+    localStorage.setItem('lac-session',JSON.stringify({email:e,name:u[e].name,role:sessRole,ts:Date.now()}));
     doPostLogin(e,u[e].name);
   } else {
     // Tenta buscar no Supabase
@@ -1836,6 +1948,13 @@ function authLogin(){
 
 function doPostLogin(e,name){
   var m=document.getElementById('LM');
+  // Super admin vai direto para painel de controle
+  if(e===SUPER_ADMIN_EMAIL){
+    currentEmail=e;
+    localStorage.setItem('lac-session',JSON.stringify({email:e,name:name,role:'superadmin',ts:Date.now()}));
+    showSuperAdminDashboard();
+    return;
+  }
   // Buscar empresas convidadas E próprias do Supabase em paralelo
   Promise.all([
     sbGetInvitedCompanies(e).catch(function(){return [];}),
