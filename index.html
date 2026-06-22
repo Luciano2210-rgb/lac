@@ -1376,35 +1376,53 @@ async function rSuperAdmin(){
 }
 
 async function superApprove(compId, ownerEmail){
-  var db=getSupa();if(!db)return;
+  var db=getSupa();
+  if(!db){alert('Erro de conexão.');return;}
   var dias=prompt('Quantos dias de acesso? (ex: 30, 60, 90, 365)', '30');
   if(!dias)return;
   var validade=new Date();
   validade.setDate(validade.getDate()+parseInt(dias));
   var validadeStr=validade.toISOString().split('T')[0];
-  await db.from('companies').update({status:'active',validade:validadeStr}).eq('id',compId);
-  alert('✅ Empresa aprovada! Acesso liberado por '+dias+' dias (até '+validade.toLocaleDateString('pt-BR')+').');
-  rSuperAdmin();
+  try{
+    var r=await db.from('companies').update({status:'active',validade:validadeStr}).eq('id',compId);
+    if(r.error){alert('Erro: '+r.error.message);return;}
+    alert('✅ Empresa aprovada! Acesso liberado por '+dias+' dias (até '+validade.toLocaleDateString('pt-BR')+').');
+    loadSuperAdminData();
+  }catch(e){
+    alert('Erro ao aprovar: '+e.message);
+  }
 }
 
 async function superBlock(compId){
   if(!confirm('Bloquear acesso desta empresa?'))return;
-  var db=getSupa();if(!db)return;
-  await db.from('companies').update({status:'blocked'}).eq('id',compId);
-  alert('Empresa bloqueada.');
-  rSuperAdmin();
+  var db=getSupa();
+  if(!db){alert('Erro de conexão.');return;}
+  try{
+    var r=await db.from('companies').update({status:'blocked'}).eq('id',compId);
+    if(r.error){alert('Erro: '+r.error.message);return;}
+    alert('✅ Empresa bloqueada com sucesso!');
+    loadSuperAdminData();
+  }catch(e){
+    alert('Erro ao bloquear: '+e.message);
+  }
 }
 
 async function superSetValidade(compId){
   var dias=prompt('Novo prazo em dias a partir de hoje:', '30');
   if(!dias)return;
-  var db=getSupa();if(!db)return;
+  var db=getSupa();
+  if(!db){alert('Erro de conexão.');return;}
   var validade=new Date();
   validade.setDate(validade.getDate()+parseInt(dias));
   var validadeStr=validade.toISOString().split('T')[0];
-  await db.from('companies').update({validade:validadeStr}).eq('id',compId);
-  alert('Validade atualizada até '+validade.toLocaleDateString('pt-BR'));
-  rSuperAdmin();
+  try{
+    var r=await db.from('companies').update({validade:validadeStr}).eq('id',compId);
+    if(r.error){alert('Erro: '+r.error.message);return;}
+    alert('✅ Validade atualizada até '+validade.toLocaleDateString('pt-BR'));
+    loadSuperAdminData();
+  }catch(e){
+    alert('Erro ao atualizar: '+e.message);
+  }
 }
 
 function rAdmin(){
